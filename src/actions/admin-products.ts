@@ -45,9 +45,9 @@ export async function createProduct(formData: FormData) {
         precio_minorista,
         categoria,
         stock,
-        talles,
-        colores,
-        fotos,
+        talles: JSON.stringify(talles),
+        colores: JSON.stringify(colores),
+        fotos: JSON.stringify(fotos),
         oculto
       }
     });
