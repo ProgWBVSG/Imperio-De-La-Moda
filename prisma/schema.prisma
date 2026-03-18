@@ -1,0 +1,33 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Producto {
+  id               String   @id @default(uuid())
+  slug             String   @unique
+  nombre           String
+  categoria        String
+  precio_mayorista Int
+  precio_minorista Int
+  descripcion      String   @default("")
+  codigo_interno   String   @default("")
+  talles           String   @default("[]")      // JSON string: ["S","M","L"]
+  colores          String   @default("[]")      // JSON string: ["Negro","Beige"]
+  stock_por_talle  String   @default("{}")      // JSON string: {"S":5,"M":3}
+  fotos            String   @default("[]")      // JSON string: URLs
+  stock            Int      @default(0)         // stock total (calculado)
+  oculto           Boolean  @default(false)
+  destacado        Boolean  @default(false)
+  novedad          Boolean  @default(true)
+  
+  creado_en        DateTime @default(now())
+  actualizado_en   DateTime @updatedAt
+
+  @@index([categoria])
+  @@index([slug])
+}
