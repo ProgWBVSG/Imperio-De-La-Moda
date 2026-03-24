@@ -133,13 +133,16 @@ export default function NuevoProducto() {
           novedad,
         }),
       });
-      if (!res.ok) throw new Error("Error al guardar");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || "Error al guardar el producto. Intentá de nuevo.");
+      }
       setGuardando(false);
       setGuardado(true);
       setTimeout(() => router.push("/admin/productos"), 1200);
-    } catch (err) {
+    } catch (err: any) {
       setGuardando(false);
-      setErrores(["Error al guardar el producto. Intentá de nuevo."]);
+      setErrores([err.message || "Error al guardar el producto. Intentá de nuevo."]);
     }
   };
 

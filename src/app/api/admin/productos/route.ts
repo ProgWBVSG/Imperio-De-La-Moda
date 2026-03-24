@@ -82,6 +82,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ ...producto, talles: JSON.parse(producto.talles), colores: JSON.parse(producto.colores), fotos: JSON.parse(producto.fotos), stock_por_talle: JSON.parse(producto.stock_por_talle) }, { status: 201 });
   } catch (error) {
     console.error("Error creando producto:", error);
-    return NextResponse.json({ error: "Error al crear producto" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Error al crear producto" }, { status: 500 });
   }
 }

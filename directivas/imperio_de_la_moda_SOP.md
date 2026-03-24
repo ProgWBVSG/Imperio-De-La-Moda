@@ -19,5 +19,6 @@ El objetivo es construir una plataforma e-commerce con **código puro** (Next.js
 - **Generador Checkout WhatsApp:**
   - La URL generada para abrir WhatsApp (`https://api.whatsapp.com/send...`) debe escapar correctamente saltos de líneas (`%0A`) e inputs de usuarios `encodeURIComponent()` para evitar links truncados.
 - **Backend Admin:** Interfaz protegida. El dueño usará esto por su celular y la manipulación (precio rápido o stock rápido a 0 o toggle producto) no puede tomar más de 3 clics o interacciones.
+- **Base de Datos / Prisma (CRÍTICO):** Este proyecto utiliza y está bloqueado a **Prisma versión 6.x**. **NO** ejecutar `npx prisma` porque puede instalar temporalmente Prisma 7.x, el cual rompe la validación del esquema (la propiedad `url` fue eliminada en Prisma 7) generando errores 500 silenciosos al intentar guardar productos (Error P1012). Usar siempre los scripts en package.json (ej: `npm run db:push`).
 
 *Nota: Esta directiva se mantendrá viva y se actualizará si encontramos nuevas "trampas" o restricciones lógicas.*
