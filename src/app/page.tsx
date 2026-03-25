@@ -199,6 +199,21 @@ export default function Home() {
       {/* 5. TESTIMONIOS DINÁMICOS */}
       <TestimonialsSection />
 
+      {/* DIVISOR DECORATIVO — rompe el espacio vacío */}
+      <div className="relative py-16 overflow-hidden flex items-center justify-center">
+        {/* Círculo grande dorado de fondo — claramente visible */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full border-2 border-accent/25" />
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-44 h-44 rounded-full border border-accent/15" />
+        {/* Líneas largas a los costados */}
+        <div className="absolute left-0 top-1/2 w-full h-px" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.3) 30%, rgba(201,168,76,0.3) 70%, transparent 100%)' }} />
+        {/* Texto ornamental central */}
+        <div className="relative z-10 flex items-center gap-6">
+          <div className="h-px w-20 bg-gradient-to-r from-transparent to-accent/50" />
+          <span className="text-accent/60 text-xs font-bold uppercase tracking-[0.35em]">Imperio de la Moda</span>
+          <div className="h-px w-20 bg-gradient-to-l from-transparent to-accent/50" />
+        </div>
+      </div>
+
       {/* 6. EL LOCAL */}
       <section className="py-24 px-4 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 items-center">

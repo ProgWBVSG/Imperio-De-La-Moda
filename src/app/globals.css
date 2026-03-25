@@ -24,8 +24,25 @@
   }
   
   html, body {
-    @apply antialiased bg-bg text-text selection:bg-accent selection:text-white scroll-smooth;
+    @apply antialiased text-text selection:bg-accent selection:text-white scroll-smooth;
     font-family: var(--font-body), 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--color-bg);
+    /* Patrón de tejido diagonal — claramente visible */
+    background-image:
+      repeating-linear-gradient(
+        45deg,
+        rgba(201, 168, 76, 0.07) 0px,
+        rgba(201, 168, 76, 0.07) 1px,
+        transparent 1px,
+        transparent 18px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(201, 168, 76, 0.07) 0px,
+        rgba(201, 168, 76, 0.07) 1px,
+        transparent 1px,
+        transparent 18px
+      );
   }
 
   h1, h2, h3, h4, h5, h6 {
