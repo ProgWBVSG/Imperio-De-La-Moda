@@ -21,13 +21,30 @@ export default function Home() {
             className="object-cover"
             priority
           />
-          {/* Overlay gradiente premium */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
         </div>
 
-        {/* Decoración sutil */}
-        <div className="absolute top-20 left-10 w-32 h-32 border border-accent/20 rounded-full animate-float opacity-30 hidden md:block"></div>
-        <div className="absolute bottom-20 right-16 w-20 h-20 border border-accent/15 rounded-full animate-float delay-300 opacity-20 hidden md:block"></div>
+        {/* Elementos decorativos del hero — claramente visibles */}
+        {/* Rombo grande esquina superior izquierda */}
+        <div className="absolute top-[-40px] left-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block" />
+        <div className="absolute top-[10px] left-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block" />
+        {/* Rombo grande esquina inferior derecha */}
+        <div className="absolute bottom-[-40px] right-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block" />
+        <div className="absolute bottom-[10px] right-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block" />
+        {/* Líneas horizontales de acento en los costados */}
+        <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-px bg-accent/50" style={{ width: `${24 - i * 4}px` }} />
+          ))}
+        </div>
+        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-end">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-px bg-accent/50" style={{ width: `${24 - i * 4}px` }} />
+          ))}
+        </div>
+        {/* Círculos flotantes */}
+        <div className="absolute top-20 left-16 w-28 h-28 border border-accent/30 rounded-full animate-float hidden md:block" />
+        <div className="absolute bottom-24 right-20 w-16 h-16 border border-accent/25 rounded-full animate-float delay-300 hidden md:block" />
 
         <div className="relative z-10 px-6 max-w-4xl flex flex-col items-center">
           <span className="text-accent text-sm font-bold uppercase tracking-[0.3em] mb-6 animate-fade-in">San Martín 390 · Córdoba</span>
@@ -67,7 +84,14 @@ export default function Home() {
       </section>
 
       {/* 2. CATEGORÍAS */}
-      <section className="py-24 px-4 max-w-7xl mx-auto w-full">
+      <section className="py-24 px-4 max-w-7xl mx-auto w-full relative">
+        {/* Rombo ornamental centrado entre secciones */}
+        <div className="absolute -top-5 left-1/2 -translate-x-1/2 flex items-center gap-3">
+          <div className="h-px w-16 bg-gradient-to-r from-transparent to-accent/50" />
+          <div className="w-3 h-3 border border-accent/60 rotate-45" />
+          <div className="h-px w-16 bg-gradient-to-l from-transparent to-accent/50" />
+        </div>
+
        <ScrollReveal>
         <div className="section-heading">
           <h2>Descubrí nuestras colecciones</h2>
@@ -95,6 +119,15 @@ export default function Home() {
           ))}
         </div>
        </ScrollReveal>
+
+        {/* Separador ornamental inferior */}
+        <div className="flex items-center gap-3 mt-16 justify-center opacity-50">
+          <div className="h-px w-24 bg-gradient-to-r from-transparent to-accent" />
+          <div className="w-2 h-2 border border-accent rotate-45" />
+          <div className="w-1 h-1 bg-accent rounded-full" />
+          <div className="w-2 h-2 border border-accent rotate-45" />
+          <div className="h-px w-24 bg-gradient-to-l from-transparent to-accent" />
+        </div>
       </section>
 
       {/* 3. ESTADÍSTICAS */}
