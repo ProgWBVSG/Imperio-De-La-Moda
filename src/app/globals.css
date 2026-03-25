@@ -113,3 +113,39 @@
 .section-heading .decorative-line {
   margin-inline: auto;
 }
+
+/* === BOTÓN RESEÑA DORADA (shimmer border animado) === */
+@keyframes shimmer-gold-spin {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.gold-review-btn-wrapper {
+  display: inline-block;
+  border-radius: 10px;
+  padding: 2px;
+  background: linear-gradient(270deg, #f5d985, #c8a951, #ffe68a, #a8752e, #f5d985);
+  background-size: 400% 400%;
+  animation: shimmer-gold-spin 3s ease infinite;
+  box-shadow: 0 0 18px rgba(200, 169, 81, 0.45);
+}
+
+.gold-review-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0D0D0D;
+  color: #f5d985;
+  font-weight: 700;
+  font-size: 0.875rem;
+  padding: 10px 22px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.gold-review-btn:hover {
+  background: transparent;
+  color: #0D0D0D;
+}
