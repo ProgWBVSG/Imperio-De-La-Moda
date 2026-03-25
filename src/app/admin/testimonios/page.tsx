@@ -1,109 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-const mockTestimonios = [
-  { id: "t1", nombre: "María S.", texto: "Compré por mayor para revender en mi pueblo y la calidad es espectacular. Ya hice mi segundo pedido.", origen: "Instagram", publicado: true, destacado: true },
-  { id: "t2", nombre: "Laura G.", texto: "Fui al local a buscar calzas y remeras. Excelente atención, me probaron lo que pedí y los precios son inmejorables.", origen: "Google Maps", publicado: true, destacado: true },
-  { id: "t3", nombre: "Martín P.", texto: "La campera puffer me salió la mitad que en el centro comercial. Totalmente recomendable.", origen: "TikTok", publicado: true, destacado: false },
-  { id: "t4", nombre: "Carolina V.", texto: "Muy buena ropa y buena onda del vendedor. Recomiendo 100%.", origen: "WhatsApp", publicado: false, destacado: false },
-];
+interface Testimonio {
+  id: string;
+  autor: string;
+  texto: string;
+  origen: string;
+  visible: boolean;
+  creado_en: string;
+}
 
-const origenes = ["Instagram", "TikTok", "WhatsApp", "Google Maps", "En persona"];
+export default function TestimoniosAdmin() {
+  const [testimonios, setTestimonios] = useState<Testimonio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-export default function TestimoniosPage() {
-  const [testimonios, setTestimonios] = useState(mockTestimonios);
-  const [showForm, setShowForm] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [texto, setTexto] = useState("");
-  const [origen, setOrigen] = useState("Instagram");
+  useEffect(() => {
+    fetchTestimonios();
+  }, []);
 
-  const togglePublicado = (id: string) => {
-    setTestimonios(prev => prev.map(t => t.id === id ? { ...t, publicado: !t.publicado } : t));
-  };
-
-  const toggleDestacado = (id: string) => {
-    setTestimonios(prev => prev.map(t => t.id === id ? { ...t, destacado: !t.destacado } : t));
-  };
-
-  const eliminar = (id: string) => {
-    if (confirm("¿Eliminar testimonio?")) {
-      setTestimonios(prev => prev.filter(t => t.id !== id));
+  const fetchTestimonios = async () => {
+    try {
+      const res = await fetch("/api/admin/testimonios");
+      if (res.ok) {
+        setTestimonios(await res.json());
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const guardar = () => {
-    if (!nombre.trim() || !texto.trim()) { alert("Nombre y texto son obligatorios"); return; }
-    setTestimonios(prev => [...prev, {
-      id: `t${Date.now()}`, nombre: nombre.trim(), texto: texto.trim(), origen, publicado: true, destacado: false,
-    }]);
-    setNombre(""); setTexto(""); setShowForm(false);
+  const toggleVisibility = async (id: string, current: boolean) => {
+    try {
+      setTestimonios(prev => prev.map(t => t.id === id ? { ...t, visible: !current } : t));
+      await fetch(`/api/admin/testimonios/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visible: !current })
+      });
+      router.refresh();
+    } catch (e) {
+      fetchTestimonios();
+    }
+  };
+
+  const deleteTestimonio = async (id: string) => {
+    if (!confirm("¿Seguro que querés eliminar esta reseña? Esta acción no se puede deshacer.")) return;
+    try {
+      setTestimonios(prev => prev.filter(t => t.id !== id));
+      await fetch(`/api/admin/testimonios/${id}`, { method: "DELETE" });
+      router.refresh();
+    } catch (e) {
+      fetchTestimonios();
+    }
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">⭐ Testimonios</h1>
-          <p className="text-sm" style={{ color: "var(--admin-text-muted)" }}>{testimonios.filter(t => t.publicado).length} publicados</p>
-        </div>
-        <button onClick={() => setShowForm(!showForm)} className="admin-btn admin-btn-primary">
-          {showForm ? "✕ Cancelar" : "➕ Nuevo"}
-        </button>
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Testimonios y Reseñas</h1>
+        <Link href="/admin/testimonios/nuevo" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition">
+          + Agregar Nuevo
+        </Link>
       </div>
 
-      {/* Formulario nuevo */}
-      {showForm && (
-        <div className="admin-card mb-6 space-y-4">
-          <h2 className="font-bold text-base">Nuevo testimonio</h2>
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1" style={{ color: "var(--admin-text-muted)" }}>Nombre *</label>
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del cliente" className="admin-input" />
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {loading ? (
+          <div className="p-8 text-center text-gray-500">Cargando testimonios...</div>
+        ) : testimonios.length === 0 ? (
+          <div className="p-8 text-center">
+            <h3 className="text-gray-500 mb-2">Aún no hay testimonios registrados</h3>
+            <p className="text-sm text-gray-400">Agregá tu primera reseña para que aparezca en la página principal.</p>
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1" style={{ color: "var(--admin-text-muted)" }}>Testimonio *</label>
-            <textarea value={texto} onChange={(e) => setTexto(e.target.value.slice(0, 300))} placeholder="Lo que dijo el cliente..." className="admin-input min-h-[80px]" />
-            <p className="text-xs mt-1 text-right" style={{ color: "var(--admin-text-muted)" }}>{texto.length}/300</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-500">
+                  <th className="p-4">Autor</th>
+                  <th className="p-4">Reseña</th>
+                  <th className="p-4">Origen</th>
+                  <th className="p-4">Visible Pág. Principal</th>
+                  <th className="p-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {testimonios.map((t) => (
+                  <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap">{t.autor}</td>
+                    <td className="p-4 text-gray-600 text-sm max-w-xs truncate" title={t.texto}>{t.texto}</td>
+                    <td className="p-4">
+                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
+                        {t.origen}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <button 
+                        onClick={() => toggleVisibility(t.id, t.visible)}
+                        className={`w-12 h-6 rounded-full relative transition-colors ${t.visible ? 'bg-green-500' : 'bg-gray-300'}`}
+                      >
+                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${t.visible ? 'left-7' : 'left-1'}`} />
+                      </button>
+                    </td>
+                    <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                      <button onClick={() => deleteTestimonio(t.id)} className="text-red-500 hover:text-red-700 font-medium text-sm">
+                        Eliminar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase mb-1" style={{ color: "var(--admin-text-muted)" }}>Origen</label>
-            <select value={origen} onChange={(e) => setOrigen(e.target.value)} className="admin-input">
-              {origenes.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
-          </div>
-          <button onClick={guardar} className="admin-btn admin-btn-primary w-full admin-btn-lg">Guardar y publicar</button>
-        </div>
-      )}
-
-      {/* Lista */}
-      <div className="space-y-3">
-        {testimonios.map(t => (
-          <div key={t.id} className="admin-card">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold" style={{ background: "var(--admin-accent)", color: "#0D0D0D" }}>
-                    {t.nombre.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-bold text-sm">{t.nombre}</p>
-                    <p className="text-[10px]" style={{ color: "var(--admin-text-muted)" }}>Vía {t.origen}</p>
-                  </div>
-                </div>
-                <p className="text-sm italic leading-relaxed" style={{ color: "var(--admin-text-muted)" }}>"{t.texto}"</p>
-              </div>
-              <div className="flex flex-col gap-2 shrink-0">
-                <button onClick={() => togglePublicado(t.id)} className={`admin-badge cursor-pointer ${t.publicado ? "admin-badge-success" : "admin-badge-muted"}`}>
-                  {t.publicado ? "Publicado" : "Oculto"}
-                </button>
-                <button onClick={() => toggleDestacado(t.id)} className={`admin-badge cursor-pointer ${t.destacado ? "admin-badge-warning" : "admin-badge-muted"}`}>
-                  {t.destacado ? "⭐ Destacado" : "Normal"}
-                </button>
-                <button onClick={() => eliminar(t.id)} className="admin-btn admin-btn-danger text-[10px] py-1">Eliminar</button>
-              </div>
-            </div>
-          </div>
-        ))}
+        )}
       </div>
     </div>
   );
