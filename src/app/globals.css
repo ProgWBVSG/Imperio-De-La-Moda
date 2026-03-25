@@ -122,7 +122,8 @@
 }
 
 .gold-review-btn-wrapper {
-  display: inline-block;
+  display: block;
+  width: fit-content;
   border-radius: 10px;
   padding: 2px;
   background: linear-gradient(270deg, #f5d985, #c8a951, #ffe68a, #a8752e, #f5d985);
