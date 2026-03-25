@@ -10,12 +10,10 @@ const getHeaders = () => ({
   "Prefer": "return=representation"
 });
 
-import { randomUUID } from "crypto";
-
-
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${params.id}`, { headers: getHeaders() });
+    const { id } = await params;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { headers: getHeaders() });
     const data = await res.json();
     if (!data.length) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
     const p = data[0];
@@ -25,8 +23,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id } = await params;
     const body = await req.json();
     const stockPorTalle = body.stock_por_talle || {};
     const stockTotal = Object.values(stockPorTalle).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
@@ -49,7 +48,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
         actualizado_en: new Date().toISOString()
     };
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${params.id}`, { method: "PATCH", headers: getHeaders(), body: JSON.stringify(payload) });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { method: "PATCH", headers: getHeaders(), body: JSON.stringify(payload) });
     const [p] = await res.json();
     return NextResponse.json({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")});
   } catch {
@@ -57,9 +56,10 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${params.id}`, { method: "DELETE", headers: getHeaders() });
+    const { id } = await params;
+    await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { method: "DELETE", headers: getHeaders() });
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json({ error: "Error" }, { status: 500 });
