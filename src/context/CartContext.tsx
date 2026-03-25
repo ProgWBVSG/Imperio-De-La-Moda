@@ -21,7 +21,7 @@ interface CartContextType {
   actualizarCantidad: (id: string, cantidad: number) => void;
   vaciarCarrito: () => void;
   generarMensajeWhatsApp: (nombreCliente?: string, esMayorista?: boolean) => string;
-  generarMensajeProducto: (producto: { nombre: string; talle?: string; color?: string }) => string;
+  generarMensajeProducto: (producto: { nombre: string; talle?: string; color?: string; cantidad?: number }) => string;
   cantidadTotal: number;
   subtotal: (esMayorista: boolean) => number;
 }
@@ -85,12 +85,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // ============================================
   // MENSAJE WHATSAPP PARA UN PRODUCTO INDIVIDUAL
   // ============================================
-  const generarMensajeProducto = (producto: { nombre: string; talle?: string; color?: string }) => {
+  const generarMensajeProducto = (producto: { nombre: string; talle?: string; color?: string; cantidad?: number }) => {
     const NUMERO_WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "543515555123";
     
     let detalles = "";
     if (producto.talle) detalles += ` en talle ${producto.talle}`;
     if (producto.color) detalles += ` color ${producto.color}`;
+    if (producto.cantidad && producto.cantidad > 1) detalles += ` (${producto.cantidad} unidades)`;
     
     const msg = `Hola, me interesa ${producto.nombre.toLowerCase()}${detalles}. ¿Tienen stock disponible? Me gustaría saber más detalles y cómo puedo comprarlo. ¡Gracias!`;
     

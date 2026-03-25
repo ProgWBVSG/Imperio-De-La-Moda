@@ -52,6 +52,7 @@ export function ProductAddToCart({ product }: ProductProps) {
     nombre: product.nombre,
     talle: selectedTalle,
     color: selectedColor,
+    cantidad: cantidad,
   });
 
   return (
