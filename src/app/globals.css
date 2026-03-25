@@ -150,3 +150,60 @@
   background: transparent;
   color: #0D0D0D;
 }
+
+/* === TEXTURAS Y PATRONES DECORATIVOS === */
+
+/* Patrón de puntos sutiles — para fondos de sección */
+.bg-dot-pattern {
+  background-image: radial-gradient(circle, rgba(201, 168, 76, 0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* Línea decorativa tipo costura (stitch) -- horizontal */
+.stitch-line {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-accent);
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+.stitch-line::before,
+.stitch-line::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-accent) 0px, var(--color-accent) 6px,
+    transparent 6px, transparent 12px
+  );
+  opacity: 0.5;
+}
+
+/* Badge de etiqueta de ropa */
+.fashion-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+  border-radius: 2px;
+  padding: 3px 10px;
+  position: relative;
+}
+.fashion-tag::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  opacity: 0.7;
+}

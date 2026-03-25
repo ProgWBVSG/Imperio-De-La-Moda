@@ -97,33 +97,47 @@ export default function Home() {
        </ScrollReveal>
       </section>
 
-      {/* 3. NÚMERO MARQUEE / ESTADÍSTICAS */}
-      <section className="bg-primary py-6 overflow-hidden">
-       <ScrollReveal direction="scale">
-        <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-8 md:gap-16 text-center">
-          {[
-            { num: "+5.000", label: "Clientes satisfechos" },
-            { num: "40%", label: "Ahorro por mayor" },
-            { num: "+12", label: "Años de experiencia" },
-            { num: "6", label: "Prendas mín. mayorista" },
-          ].map((stat, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <span className="text-accent text-3xl md:text-4xl font-bold">{stat.num}</span>
-              <span className="text-gray-400 text-xs mt-1 uppercase tracking-wider font-medium">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-       </ScrollReveal>
+      {/* 3. ESTADÍSTICAS */}
+      <section className="bg-primary py-10 overflow-hidden relative">
+        {/* Detalles de fondo: puntos decorativos */}
+        <div className="absolute inset-0 bg-dot-pattern opacity-30" />
+        {/* Líneas diagonales de textura tipo tela */}
+        <div className="absolute top-0 right-0 w-40 h-full opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #C9A84C 0, #C9A84C 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }} />
+        <div className="absolute top-0 left-0 w-40 h-full opacity-5" style={{ backgroundImage: 'repeating-linear-gradient(45deg, #C9A84C 0, #C9A84C 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px' }} />
+
+        <ScrollReveal direction="scale">
+          <div className="max-w-7xl mx-auto px-4 flex flex-wrap justify-center gap-8 md:gap-0 text-center relative z-10">
+            {[
+              { num: "+5.000", label: "Clientes satisfechos" },
+              { num: "40%", label: "Ahorro por mayor" },
+              { num: "+12", label: "A\u00f1os de experiencia" },
+              { num: "6", label: "Prendas m\u00edn. mayorista" },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center px-8 md:px-12 first:border-l-0 md:border-l border-white/10">
+                <span className="text-accent text-3xl md:text-5xl font-bold tracking-tight">{stat.num}</span>
+                <span className="text-gray-500 text-xs mt-2 uppercase tracking-[0.2em] font-medium">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
       </section>
 
       {/* 4. PROPUESTA DE VALOR */}
-      <section className="py-24 bg-surface">
-        <div className="max-w-7xl mx-auto px-4">
+      <section className="py-24 bg-surface relative overflow-hidden">
+        {/* Formas flotantes decorativas de fondo */}
+        <div className="absolute -top-12 -right-12 w-56 h-56 rounded-full bg-accent/5 blur-2xl" />
+        <div className="absolute bottom-0 -left-16 w-72 h-72 rounded-full bg-accent/4 blur-3xl" />
+        {/* Hilo de costura decorativo vertical en los costados */}
+        <div className="absolute left-6 top-1/4 h-1/2 w-px hidden xl:block" style={{ background: 'repeating-linear-gradient(180deg, #C9A84C 0px, #C9A84C 5px, transparent 5px, transparent 12px)', opacity: 0.2 }} />
+        <div className="absolute right-6 top-1/4 h-1/2 w-px hidden xl:block" style={{ background: 'repeating-linear-gradient(180deg, #C9A84C 0px, #C9A84C 5px, transparent 5px, transparent 12px)', opacity: 0.2 }} />
+
+        <div className="max-w-7xl mx-auto px-4 relative z-10">
           <ScrollReveal>
-          <div className="section-heading">
-            <h2>¿Por qué elegirnos?</h2>
-            <span className="decorative-line decorative-line-center"></span>
-          </div>
+            <div className="section-heading">
+              <span className="fashion-tag mb-4 mx-auto">Por qué elegirnos</span>
+              <h2 className="mt-4">Ropa de calidad,<br /><em className="text-accent">precio honesto</em></h2>
+              <span className="decorative-line decorative-line-center"></span>
+            </div>
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -132,12 +146,16 @@ export default function Home() {
               { icon: "💬", title: "Atención directa", desc: "Sin chat bots genéricos. Te respondemos directo por WhatsApp y te asesoramos." },
             ].map((item, i) => (
               <ScrollReveal key={i} delay={i * 150} direction="up">
-              <div className="bg-white p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-shadow text-center group">
-                <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl group-hover:scale-110 transition-transform">
+              <div className="bg-white p-8 rounded-2xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center group relative overflow-hidden">
+                {/* Esquina decorativa */}
+                <div className="absolute top-0 right-0 w-16 h-16 bg-accent/5 rounded-bl-3xl" />
+                <div className="w-16 h-16 bg-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-3xl group-hover:scale-110 group-hover:bg-accent/20 transition-all">
                   {item.icon}
                 </div>
                 <h3 className="text-xl font-bold text-primary mb-3">{item.title}</h3>
                 <p className="text-text-muted leading-relaxed text-sm">{item.desc}</p>
+                {/* Línea inferior decorativa */}
+                <div className="mt-6 mx-auto w-8 h-0.5 bg-accent/30 rounded group-hover:w-16 transition-all duration-500" />
               </div>
               </ScrollReveal>
             ))}
