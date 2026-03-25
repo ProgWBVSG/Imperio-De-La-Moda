@@ -195,7 +195,7 @@ export default function Home() {
             {/* Botón Reseña Dorada */}
             <div className="gold-review-btn-wrapper mt-3">
               <a
-                href="https://search.google.com/local/writereview?placeid=ChIJTuqTCZCTGZQRBLGA3gQIaQ"
+                href="https://search.google.com/local/writereview?placeid=ChIJT-pLOQCZMpQR5LGAoKROv10"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="gold-review-btn"
