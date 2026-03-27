@@ -25,7 +25,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
             <Link href="/catalogo" className="hover:text-accent transition-colors">Catálogo</Link>
             <Link href="/mayoristas" className="hover:text-accent transition-colors">Mayoristas</Link>
-            <Link href="/charlas" className="hover:text-accent transition-colors">Charlas</Link>
+
             <Link href="/nosotros" className="hover:text-accent transition-colors">Nosotros</Link>
           </div>
           
@@ -87,7 +87,7 @@ export default function Navbar() {
           <div className="flex flex-col space-y-4 pt-4">
             <Link href="/catalogo" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Catálogo</Link>
             <Link href="/mayoristas" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Mayoristas</Link>
-            <Link href="/charlas" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Charlas</Link>
+
             <Link href="/nosotros" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Nosotros</Link>
             <a href="https://api.whatsapp.com/send?phone=543515555123" target="_blank" rel="noopener noreferrer" className="bg-accent text-primary px-4 py-3 rounded-radius-base text-center font-bold mt-4">
               Contacto Directo

@@ -26,7 +26,7 @@ export default function Nosotros() {
                 [HISTORIA PENDIENTE A CONFIRMAR: Acá va un texto real redactado junto al dueño, explicando cómo arrancó, por qué decidió poner el local en San Martín 390, y el sacrificio o anécdota fundacional del local.]
               </p>
               <p>
-                Sabemos lo difícil que es emprender en Argentina. Por eso no solo vendemos ropa, sino que damos herramientas, charlas y asesoramiento para que quienes compran por mayor, puedan armar su propio negocio rentable y salir adelante en su ciudad.
+                Sabemos lo difícil que es emprender en Argentina. Por eso no solo vendemos ropa, sino que damos herramientas y asesoramiento para que quienes compran por mayor, puedan armar su propio negocio rentable y salir adelante en su ciudad.
               </p>
             </div>
             

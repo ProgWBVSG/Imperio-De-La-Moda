@@ -10,7 +10,6 @@ const navItems = [
   { icon: "📋", label: "Stock", href: "/admin/stock" },
   { icon: "💬", label: "Pedidos WA", href: "/admin/pedidos" },
   { icon: "⭐", label: "Testimonios", href: "/admin/testimonios" },
-  { icon: "🎤", label: "Charlas", href: "/admin/charlas" },
   { icon: "⚙️", label: "Config", href: "/admin/configuracion" },
 ];
 
