@@ -44,7 +44,7 @@ export default function Navbar() {
                 </span>
               )}
             </Link>
-            <a href="https://api.whatsapp.com/send?phone=543515555123" target="_blank" rel="noopener noreferrer" className="bg-accent text-primary px-5 py-2 rounded-radius-base text-sm font-bold hover:bg-opacity-90 transition-colors">
+            <a href="https://api.whatsapp.com/send?phone=5493512336795" target="_blank" rel="noopener noreferrer" className="bg-accent text-primary px-5 py-2 rounded-radius-base text-sm font-bold hover:bg-opacity-90 transition-colors">
               Contacto Directo
             </a>
           </div>
@@ -89,7 +89,7 @@ export default function Navbar() {
             <Link href="/mayoristas" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Mayoristas</Link>
 
             <Link href="/nosotros" onClick={() => setIsOpen(false)} className="text-bg hover:text-accent font-medium">Nosotros</Link>
-            <a href="https://api.whatsapp.com/send?phone=543515555123" target="_blank" rel="noopener noreferrer" className="bg-accent text-primary px-4 py-3 rounded-radius-base text-center font-bold mt-4">
+            <a href="https://api.whatsapp.com/send?phone=5493512336795" target="_blank" rel="noopener noreferrer" className="bg-accent text-primary px-4 py-3 rounded-radius-base text-center font-bold mt-4">
               Contacto Directo
             </a>
           </div>

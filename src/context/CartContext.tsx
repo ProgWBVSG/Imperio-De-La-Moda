@@ -86,7 +86,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // MENSAJE WHATSAPP PARA UN PRODUCTO INDIVIDUAL
   // ============================================
   const generarMensajeProducto = (producto: { nombre: string; talle?: string; color?: string; cantidad?: number }) => {
-    const NUMERO_WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "543515555123";
+    const NUMERO_WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493512336795";
     
     let detalles = "";
     if (producto.talle) detalles += ` en talle ${producto.talle}`;
@@ -102,7 +102,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // MENSAJE WHATSAPP PARA EL CARRITO COMPLETO
   // ============================================
   const generarMensajeWhatsApp = (nombreCliente?: string, esMayorista: boolean = false) => {
-    const NUMERO_WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "543515555123";
+    const NUMERO_WA = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493512336795";
     
     // Agrupar por nombre de producto para un mensaje más natural
     const productosAgrupados: Record<string, { items: CartItem[]; totalCantidad: number }> = {};

@@ -6,7 +6,7 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import TestimonialsSection from "@/components/ui/TestimonialsSection";
 
 export default function Home() {
-  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "543515555123";
+  const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493512336795";
   const heroWhatsappUrl = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=Hola,%20me%20interesa%20comprar%20ropa%20por%20mayor`;
 
   return (
