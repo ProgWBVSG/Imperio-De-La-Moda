@@ -32,3 +32,16 @@ model Producto {
   @@index([categoria])
   @@index([slug])
 }
+
+model Pedido {
+  id               String   @id @default(uuid())
+  cliente          String
+  items            String   // JSON string: [{ nombre, precio, cantidad, talle }]
+  total            Float
+  estado           String   @default("PENDIENTE") // PENDIENTE, CONFIRMADO, ENTREGADO, CANCELADO
+  esMayorista      Boolean  @default(false)
+  whatsappUrl      String   @default("") // Link de WA generado, opcional
+  
+  creado_en        DateTime @default(now())
+  actualizado_en   DateTime @updatedAt
+}

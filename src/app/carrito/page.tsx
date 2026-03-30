@@ -10,6 +10,7 @@ export default function CartPage() {
   
   const [esMayorista, setEsMayorista] = useState(false);
   const [nombre, setNombre] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const MIN_MAYORISTA = 6; // Confirmar esto con el cliente
 
@@ -22,13 +23,37 @@ export default function CartPage() {
     setEsMayorista(val);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!nombre.trim()) {
       alert("Por favor ingresá tu nombre para tomar el pedido.");
       return;
     }
+
+    setIsSubmitting(true);
     const url = generarMensajeWhatsApp(nombre, esMayorista);
-    window.open(url, '_blank');
+
+    try {
+      await fetch('/api/pedidos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cliente: nombre,
+          items,
+          total: subtotal(esMayorista),
+          esMayorista,
+          whatsappUrl: url
+        }),
+      });
+
+      window.open(url, '_blank');
+      vaciarCarrito();
+    } catch (error) {
+      console.error(error);
+      alert("Hubo un error al procesar tu pedido pero te redirigiremos a WhatsApp continuar.");
+      window.open(url, '_blank');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (items.length === 0) {
@@ -174,10 +199,17 @@ export default function CartPage() {
 
               <button 
                 onClick={handleCheckout}
-                className="w-full bg-whatsapp text-white py-4 rounded-radius-base font-bold text-lg hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)]"
+                disabled={isSubmitting}
+                className="w-full bg-whatsapp text-white py-4 rounded-radius-base font-bold text-lg hover:bg-opacity-90 transition-all flex items-center justify-center gap-2 shadow-[0_4px_14px_0_rgba(37,211,102,0.39)] hover:shadow-[0_6px_20px_rgba(37,211,102,0.23)] disabled:opacity-70 disabled:cursor-not-allowed"
               >
-                <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.096-1.332-.116-.399-.129-1.071-.352-2.05-1.127-1.106-.878-1.722-2.087-1.917-2.359-.14-.195-.477-.6-.477-1.163 0-.583.273-.892.4-.103.11-.122.258-.142.35-.142.11 0 .204.004.298.006.115.006.27-.044.423.324.156.377.534 1.304.58 1.402.046.096.082.203.013.344-.069.143-.106.23-.21.353-.105.123-.224.272-.319.349-.107.086-.22.18-.101.385.118.204.526.87 1.134 1.41.785.698 1.439.914 1.644.914.205 0 .324.088.441-.044.116-.134.502-.584.636-.786.134-.202.268-.168.455-.098.188.07.118-.616 1.391-.685.187-.07.31-.105.356-.142.045-.038.045-.195-.098-.6z" /></svg>
-                Realizar Pedido
+                {isSubmitting ? (
+                  "Procesando..."
+                ) : (
+                  <>
+                    <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.096-1.332-.116-.399-.129-1.071-.352-2.05-1.127-1.106-.878-1.722-2.087-1.917-2.359-.14-.195-.477-.6-.477-1.163 0-.583.273-.892.4-.103.11-.122.258-.142.35-.142.11 0 .204.004.298.006.115.006.27-.044.423.324.156.377.534 1.304.58 1.402.046.096.082.203.013.344-.069.143-.106.23-.21.353-.105.123-.224.272-.319.349-.107.086-.22.18-.101.385.118.204.526.87 1.134 1.41.785.698 1.439.914 1.644.914.205 0 .324.088.441-.044.116-.134.502-.584.636-.786.134-.202.268-.168.455-.098.188.07.118-.616 1.391-.685.187-.07.31-.105.356-.142.045-.038.045-.195-.098-.6z" /></svg>
+                    Realizar Pedido
+                  </>
+                )}
               </button>
             </div>
           </div>
