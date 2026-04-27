@@ -10,14 +10,28 @@ export default function TestimonialsSection() {
 
   useEffect(() => {
     fetch("/api/testimonios")
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("API failed");
+        return res.json();
+      })
       .then((data) => {
-        setTestimonios(data);
+        // Aseguramos que data sea un array válido, sino seteamos un fallback
+        if (Array.isArray(data)) {
+          setTestimonios(data);
+        } else {
+          console.error("Testimonios API returned non-array payload", data);
+          setTestimonios([]);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching testimonios:", err);
+        setTestimonios([]);
         setLoading(false);
       });
   }, []);
 
-  if (loading || !testimonios || testimonios.length === 0) return null;
+  if (loading || !Array.isArray(testimonios) || testimonios.length === 0) return null;
 
   return (
     <section className="py-24 bg-bg">

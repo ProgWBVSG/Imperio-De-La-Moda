@@ -24,6 +24,8 @@ export async function GET() {
     
     return NextResponse.json(data);
   } catch (error) {
-    return NextResponse.json({ error: "Error listando testimonios" }, { status: 500 });
+    console.error("Testimonio API Exception", error);
+    // Para simplificar y evitar fallos 100% devolvemos fallback array
+    return NextResponse.json([], { status: 500 });
   }
 }
