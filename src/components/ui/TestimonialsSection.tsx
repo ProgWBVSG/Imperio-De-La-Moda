@@ -5,7 +5,7 @@ import TestimonialCarousel from "./TestimonialCarousel";
 import ScrollReveal from "./ScrollReveal";
 
 export default function TestimonialsSection() {
-  const [testimonios, setTestimonios] = useState([]);
+  const [testimonios, setTestimonios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
