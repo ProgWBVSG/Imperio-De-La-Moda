@@ -33,13 +33,22 @@ export default function Catalog() {
   useEffect(() => {
     // Fetch inicial de todos los productos
     fetch('/api/productos')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("API failed");
+        return res.json();
+      })
       .then(data => {
-        setProducts(data);
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else {
+          console.error("Productos API returned non-array payload", data);
+          setProducts([]);
+        }
         setLoading(false);
       })
       .catch(err => {
         console.error("Error cargando productos", err);
+        setProducts([]);
         setLoading(false);
       });
   }, []);

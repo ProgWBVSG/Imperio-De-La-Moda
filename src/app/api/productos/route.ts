@@ -23,9 +23,16 @@ export async function GET(req: Request) {
     if (limit) fetchUrl += `&limit=${limit}`;
 
     const res = await fetch(fetchUrl, { headers: getHeaders() });
+    if (!res.ok) {
+        throw new Error("Supabase fetch failed");
+    }
     const data = await res.json();
+    if (!Array.isArray(data)) {
+        throw new Error("Payload is not an array");
+    }
     return NextResponse.json(data.map((p: any) => ({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")})));
-  } catch {
-    return NextResponse.json({ error: "Error" }, { status: 500 });
+  } catch (err) {
+    console.error("API Productos Exception", err);
+    return NextResponse.json([], { status: 500 });
   }
 }
