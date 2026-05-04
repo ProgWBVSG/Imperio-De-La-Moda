@@ -1,19 +1,12 @@
 import { NextResponse } from "next/server";
-
-const SUPABASE_URL = "https://guppnkrbifvmgrvzejyp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1cHBua3JiaWZ2bWdydnplanlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzODMzMjMsImV4cCI6MjA4OTk1OTMyM30.fXiAwfAyS1thLYHEZr_t2sd6iqrdN42ksk7Vq5u3B3I";
-
-const getHeaders = () => ({
-  "apikey": SUPABASE_ANON_KEY,
-  "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-  "Content-Type": "application/json",
-  "Prefer": "return=representation"
-});
-
+import { SUPABASE_URL, getSupabaseHeaders } from "@/lib/supabase";
+import { requireAdmin } from "@/lib/auth";
 import { randomUUID } from "crypto";
 
-
 export async function GET(request: Request) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("q") || "";
   const estado = searchParams.get("estado") || "";
@@ -24,7 +17,7 @@ export async function GET(request: Request) {
     else if (estado === "ocultos") fetchUrl += `&oculto=eq.true`;
     else if (estado === "sin-stock") fetchUrl += `&stock=eq.0`;
 
-    const res = await fetch(fetchUrl, { headers: getHeaders() });
+    const res = await fetch(fetchUrl, { headers: getSupabaseHeaders() });
     if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
     const data = await res.json();
     return NextResponse.json(data.map((p: any) => ({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")})));
@@ -39,7 +32,7 @@ export async function POST(request: Request) {
     let slug = body.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     
     // ver unique
-    const uRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto?slug=eq.${slug}`, { headers: getHeaders() });
+    const uRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto?slug=eq.${slug}`, { headers: getSupabaseHeaders() });
     const uData = await uRes.json();
     if (uData.length > 0) slug = `${slug}-${Date.now()}`;
 
@@ -66,7 +59,7 @@ export async function POST(request: Request) {
         actualizado_en: new Date().toISOString()
     };
 
-    const iRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto`, { method: "POST", headers: getHeaders(), body: JSON.stringify(payload) });
+    const iRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto`, { method: "POST", headers: getSupabaseHeaders(), body: JSON.stringify(payload) });
     if (!iRes.ok) throw new Error("Insert failed");
     const [inserted] = await iRes.json();
 

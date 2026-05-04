@@ -2,8 +2,14 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 
 export const metadata: Metadata = {
-  title: 'Comprá por Mayor y Revendé',
-  description: 'Iniciá tu propio negocio vendiendo ropa de Imperio de la Moda. Precios mayoristas desde $4.000, sin envíos por ahora (retiro en Córdoba).',
+  title: 'Ropa por Mayor en Córdoba | Precios Mayoristas desde $4.000',
+  description: 'Comprá ropa al por mayor en Córdoba y revendé con tu margen. Prendas desde $4.000, mínimo 6 unidades. Mujer, hombre y niños. Local en San Martín 382, centro. Sin intermediarios.',
+  alternates: { canonical: 'https://imperiolamoda.com.ar/mayoristas' },
+  keywords: ['ropa mayorista Córdoba', 'comprar ropa por mayor', 'revender ropa Argentina', 'proveedor ropa Córdoba', 'mayorista indumentaria', 'ropa al por mayor Argentina'],
+  openGraph: {
+    title: 'Programa Mayorista | Imperio de la Moda — Córdoba',
+    description: 'Iniciá tu negocio de ropa comprando al mejor precio mayorista directo en Córdoba.',
+  },
 };
 
 export default function Mayoristas() {

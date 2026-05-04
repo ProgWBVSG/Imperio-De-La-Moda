@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 // Definimos la interfaz base
 export interface Product {
@@ -18,20 +19,114 @@ export interface Product {
   fotos: string[];
   stock: number;
   oculto: boolean;
+  // Promo fields
+  en_promo?: boolean;
+  promo_nombre?: string;
+  promo_porcentaje?: number;
+  precio_minorista_promo?: number;
+  precio_mayorista_promo?: number;
 }
 
-export default function Catalog() {
+interface PromoActiva {
+  id: string;
+  nombre: string;
+  descripcion: string;
+  porcentaje_descuento: number;
+  fecha_fin: string;
+}
+
+function PromoFilterGroup({ categoria, setCategoria, precioMax, setPrecioMax, promoCount }: {
+  categoria: string;
+  setCategoria: (v: string) => void;
+  precioMax: number;
+  setPrecioMax: (v: number) => void;
+  promoCount: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const isPromo = categoria === 'promos';
+
+  return (
+    <div className="mt-1">
+      {/* Fila principal de Promos */}
+      <div className="flex items-center gap-2">
+        <label className={`flex items-center gap-2 cursor-pointer py-1 flex-1 ${isPromo ? 'font-bold text-red-600' : ''}`}>
+          <input 
+            type="radio" 
+            name="categoria" 
+            value="promos" 
+            checked={isPromo}
+            onChange={() => { setCategoria('promos'); setPrecioMax(50000); }}
+            className="text-accent focus:ring-accent"
+          />
+          <span>🔥 Promos{promoCount > 0 ? ` (${promoCount})` : ''}</span>
+        </label>
+        <button 
+          onClick={() => setOpen(!open)} 
+          className="p-1 hover:bg-gray-100 rounded transition-colors"
+          aria-label="Ver sub-filtros de precio"
+        >
+          <svg 
+            className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${open ? 'rotate-180' : ''}`} 
+            fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Sub-opciones de precio */}
+      {open && (
+        <div className="ml-6 mt-1 space-y-1 border-l-2 border-red-200 pl-3 pb-1">
+          <button
+            onClick={() => { setCategoria('promos'); setPrecioMax(9900); }}
+            className={`block w-full text-left text-sm py-1.5 px-2 rounded transition-colors ${
+              isPromo && precioMax === 9900 
+                ? 'bg-red-50 text-red-600 font-bold' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-red-500'
+            }`}
+          >
+            💲 Menos de $9.900
+          </button>
+          <button
+            onClick={() => { setCategoria('promos'); setPrecioMax(19900); }}
+            className={`block w-full text-left text-sm py-1.5 px-2 rounded transition-colors ${
+              isPromo && precioMax === 19900 
+                ? 'bg-red-50 text-red-600 font-bold' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-red-500'
+            }`}
+          >
+            💲 Menos de $19.900
+          </button>
+          <button
+            onClick={() => { setCategoria('promos'); setPrecioMax(50000); }}
+            className={`block w-full text-left text-sm py-1.5 px-2 rounded transition-colors ${
+              isPromo && precioMax === 50000 
+                ? 'bg-red-50 text-red-600 font-bold' 
+                : 'text-gray-600 hover:bg-gray-50 hover:text-red-500'
+            }`}
+          >
+            Todas las promos
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function CatalogContent() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [promoActiva, setPromoActiva] = useState<PromoActiva | null>(null);
   
-  // Filtros
+  // Filtros — inicializar desde query params de la URL
   const [search, setSearch] = useState("");
-  const [categoria, setCategoria] = useState("todas");
-  const [precioMax, setPrecioMax] = useState(30000);
+  const [categoria, setCategoria] = useState(searchParams.get("categoria") || "todas");
+  const [precioMax, setPrecioMax] = useState(Number(searchParams.get("precioMax")) || 50000);
   const [order, setOrder] = useState("nuevo");
 
   useEffect(() => {
-    // Fetch inicial de todos los productos
+    // Fetch productos
     fetch('/api/productos')
       .then(res => {
         if (!res.ok) throw new Error("API failed");
@@ -51,6 +146,16 @@ export default function Catalog() {
         setProducts([]);
         setLoading(false);
       });
+
+    // Fetch promos activas
+    fetch('/api/promos')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setPromoActiva(data[0]); // mostrar la primera promo activa
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // Filtrado reactivo en el cliente
@@ -62,20 +167,35 @@ export default function Catalog() {
       result = result.filter(p => p.nombre.toLowerCase().includes(search.toLowerCase()));
     }
     
-    // Filtro categoría
-    if (categoria !== "todas") {
+    // Filtro categoría — "promos" es una categoría especial
+    if (categoria === "promos") {
+      result = result.filter(p => p.en_promo);
+    } else if (categoria !== "todas") {
       result = result.filter(p => p.categoria === categoria);
     }
     
-    // Filtro precio (basado en minorista por defecto)
-    result = result.filter(p => p.precio_minorista <= precioMax);
+    // Filtro precio (basado en precio efectivo: promo si tiene, sino normal)
+    result = result.filter(p => {
+      const precioEfectivo = p.en_promo && p.precio_minorista_promo ? p.precio_minorista_promo : p.precio_minorista;
+      return precioEfectivo <= precioMax;
+    });
     
     // Ordenamiento
-    if (order === "menor_precio") result.sort((a, b) => a.precio_minorista - b.precio_minorista);
-    if (order === "mayor_precio") result.sort((a, b) => b.precio_minorista - a.precio_minorista);
+    if (order === "menor_precio") result.sort((a, b) => {
+      const pa = a.en_promo && a.precio_minorista_promo ? a.precio_minorista_promo : a.precio_minorista;
+      const pb = b.en_promo && b.precio_minorista_promo ? b.precio_minorista_promo : b.precio_minorista;
+      return pa - pb;
+    });
+    if (order === "mayor_precio") result.sort((a, b) => {
+      const pa = a.en_promo && a.precio_minorista_promo ? a.precio_minorista_promo : a.precio_minorista;
+      const pb = b.en_promo && b.precio_minorista_promo ? b.precio_minorista_promo : b.precio_minorista;
+      return pb - pa;
+    });
     
     return result;
   }, [products, search, categoria, precioMax, order]);
+
+  const promoCount = products.filter(p => p.en_promo).length;
 
   return (
     <div className="bg-bg min-h-screen pb-20">
@@ -84,6 +204,35 @@ export default function Catalog() {
         <h1 className="font-display text-4xl font-bold mb-4">Catálogo Completo</h1>
         <p className="text-gray-400 max-w-2xl mx-auto">Filtrá por precio, talle o categoría. Recordá que comprando por mayor accedés a descuentos de hasta el 40%.</p>
       </section>
+
+      {/* Banner promo activa */}
+      {promoActiva && (
+        <div className="bg-gradient-to-r from-red-600 via-red-500 to-orange-500 text-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)' }} />
+          <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between relative z-10">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl animate-pulse">🔥</span>
+              <div>
+                <p className="font-bold text-lg">{promoActiva.nombre}</p>
+                {promoActiva.descripcion && (
+                  <p className="text-sm text-white/80">{promoActiva.descripcion}</p>
+                )}
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="bg-white text-red-600 font-black text-xl px-4 py-2 rounded-xl shadow-lg">
+                -{promoActiva.porcentaje_descuento}%
+              </span>
+              <button
+                onClick={() => setCategoria("promos")}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg font-bold text-sm transition-colors hidden sm:block"
+              >
+                Ver productos →
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto px-4 mt-8 flex flex-col md:flex-row gap-8">
         
@@ -105,18 +254,33 @@ export default function Catalog() {
 
           <div>
             <label className="block text-sm font-bold text-primary mb-2">Categoría</label>
-            <div className="space-y-2">
-              {['todas', 'mujer', 'hombre', 'ninos', 'accesorios'].map(cat => (
-                <label key={cat} className="flex items-center gap-2 cursor-pointer">
+            <div className="space-y-1">
+              {/* PROMOS con sub-opciones desplegables — arriba de todo */}
+              <PromoFilterGroup
+                categoria={categoria}
+                setCategoria={setCategoria}
+                precioMax={precioMax}
+                setPrecioMax={setPrecioMax}
+                promoCount={promoCount}
+              />
+
+              {[
+                { key: 'todas', label: 'Todas' },
+                { key: 'mujer', label: 'Mujer' },
+                { key: 'hombre', label: 'Hombre' },
+                { key: 'ninos', label: 'Niños' },
+                { key: 'accesorios', label: 'Accesorios' },
+              ].map(cat => (
+                <label key={cat.key} className="flex items-center gap-2 cursor-pointer py-1">
                   <input 
                     type="radio" 
                     name="categoria" 
-                    value={cat} 
-                    checked={categoria === cat}
-                    onChange={() => setCategoria(cat)}
+                    value={cat.key} 
+                    checked={categoria === cat.key}
+                    onChange={() => { setCategoria(cat.key); setPrecioMax(50000); }}
                     className="text-accent focus:ring-accent"
                   />
-                  <span className="capitalize text-gray-700">{cat}</span>
+                  <span className="capitalize text-gray-700">{cat.label}</span>
                 </label>
               ))}
             </div>
@@ -156,7 +320,9 @@ export default function Catalog() {
         {/* GRILLA DE PRODUCTOS */}
         <main className="flex-1">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="font-bold text-xl text-primary">Resultados ({filteredProducts.length})</h2>
+            <h2 className="font-bold text-xl text-primary">
+              {categoria === "promos" ? "🔥 Productos en promo" : "Resultados"} ({filteredProducts.length})
+            </h2>
           </div>
 
           {loading ? (
@@ -196,7 +362,14 @@ export default function Catalog() {
                         loading="lazy"
                       />
                     )}
-                    {product.stock < 5 && product.stock > 0 && (
+                    {/* Badge de promo */}
+                    {product.en_promo && product.promo_porcentaje && (
+                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-black px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1 z-10">
+                        <span className="text-base">🔥</span>
+                        <span>-{product.promo_porcentaje}%</span>
+                      </span>
+                    )}
+                    {product.stock < 5 && product.stock > 0 && !product.en_promo && (
                       <span className="absolute top-2 left-2 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Últimos {product.stock}</span>
                     )}
                     {product.stock === 0 && (
@@ -210,13 +383,29 @@ export default function Catalog() {
                     <h3 className="font-bold text-primary line-clamp-2 leading-tight mb-2 group-hover:text-accent transition-colors">{product.nombre}</h3>
                     
                     <div className="mt-auto space-y-1">
+                      {/* Precios mayorista */}
                       <div className="flex justify-between items-end">
                         <span className="text-xs font-bold text-whatsapp bg-whatsapp/10 px-1.5 py-0.5 rounded">Mayorista</span>
-                        <span className="font-bold text-whatsapp">${product.precio_mayorista.toLocaleString('es-AR')}</span>
+                        {product.en_promo && product.precio_mayorista_promo ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 line-through">${product.precio_mayorista.toLocaleString('es-AR')}</span>
+                            <span className="font-bold text-red-600">${product.precio_mayorista_promo.toLocaleString('es-AR')}</span>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-whatsapp">${product.precio_mayorista.toLocaleString('es-AR')}</span>
+                        )}
                       </div>
+                      {/* Precios minorista */}
                       <div className="flex justify-between items-end">
                         <span className="text-xs text-gray-500">Minorista</span>
-                        <span className="font-bold text-gray-900">${product.precio_minorista.toLocaleString('es-AR')}</span>
+                        {product.en_promo && product.precio_minorista_promo ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-400 line-through">${product.precio_minorista.toLocaleString('es-AR')}</span>
+                            <span className="font-bold text-red-600">${product.precio_minorista_promo.toLocaleString('es-AR')}</span>
+                          </div>
+                        ) : (
+                          <span className="font-bold text-gray-900">${product.precio_minorista.toLocaleString('es-AR')}</span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -227,5 +416,13 @@ export default function Catalog() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function Catalog() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-primary font-bold">Cargando catálogo...</div>}>
+      <CatalogContent />
+    </Suspense>
   );
 }

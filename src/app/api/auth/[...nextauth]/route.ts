@@ -10,8 +10,13 @@ const handler = NextAuth({
         password: { label: "Contraseña", type: "password" }
       },
       async authorize(credentials) {
-        const validUser = process.env.ADMIN_USERNAME || "benja";
-        const validPass = process.env.ADMIN_PASSWORD || "123";
+        const validUser = process.env.ADMIN_USERNAME;
+        const validPass = process.env.ADMIN_PASSWORD;
+        
+        if (!validUser || !validPass) {
+          console.error("⚠️ ADMIN_USERNAME o ADMIN_PASSWORD no configurados en .env");
+          return null;
+        }
         
         if (
           credentials?.username === validUser &&
@@ -33,7 +38,7 @@ const handler = NextAuth({
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 días
   },
-  secret: process.env.NEXTAUTH_SECRET || "secreto_desarrollo_imperio",
+  secret: process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };

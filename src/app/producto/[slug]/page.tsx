@@ -1,11 +1,9 @@
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase";
 import { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ProductAddToCart } from '@/components/cart/ProductAddToCart';
-
-const SUPABASE_URL = "https://guppnkrbifvmgrvzejyp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd1cHBua3JiaWZ2bWdydnplanlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzODMzMjMsImV4cCI6MjA4OTk1OTMyM30.fXiAwfAyS1thLYHEZr_t2sd6iqrdN42ksk7Vq5u3B3I";
 
 // API para buscar Data del producto directo de Supabase REST
 async function getProduct(slug: string) {
@@ -32,14 +30,26 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const product = await getProduct(slug);
   if (!product) return { title: 'No encontrado' };
 
+  const categoryMap: Record<string, string> = {
+    mujer: 'Ropa Mujer',
+    hombre: 'Ropa Hombre',
+    ninos: 'Ropa Niños',
+    accesorios: 'Accesorios de Moda',
+  };
+
+  const catLabel = categoryMap[product.categoria] || product.categoria;
+
   return {
-    title: product.nombre,
-    description: product.descripcion,
+    title: `${product.nombre} | Comprar en Imperio de la Moda Córdoba`,
+    description: `${product.descripcion || product.nombre}. Precio minorista: $${product.precio_minorista?.toLocaleString('es-AR')}. Precio mayorista: $${product.precio_mayorista?.toLocaleString('es-AR')}. Disponible en Imperio de la Moda, San Martín 382, Córdoba.`,
+    keywords: [product.nombre, catLabel, `${catLabel} Córdoba`, 'ropa mayorista Córdoba', 'imperio de la moda'],
+    alternates: { canonical: `https://imperiolamoda.com.ar/producto/${product.slug}` },
     openGraph: {
-      title: product.nombre,
+      title: `${product.nombre} — Imperio de la Moda`,
       description: product.descripcion,
-      images: [product.fotos[0]],
-    }
+      images: product.fotos?.[0] ? [{ url: product.fotos[0], alt: product.nombre }] : [],
+      type: 'website',
+    },
   };
 }
 
@@ -62,24 +72,54 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            name: product.nombre,
-            image: product.fotos,
-            description: product.descripcion,
-            brand: { "@type": "Brand", name: "Imperio de la Moda" },
-            offers: {
-              "@type": "Offer",
-              url: `https://imperiolamoda.com.ar/producto/${product.slug}`,
-              priceCurrency: "ARS",
-              price: product.precio_minorista,
-              availability: product.stock > 0
-                ? "https://schema.org/InStock"
-                : "https://schema.org/OutOfStock",
-              seller: { "@type": "Organization", name: "Imperio de la Moda" },
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org/",
+              "@type": "Product",
+              name: product.nombre,
+              image: product.fotos,
+              description: product.descripcion,
+              brand: { "@type": "Brand", name: "Imperio de la Moda" },
+              category: product.categoria,
+              offers: {
+                "@type": "AggregateOffer",
+                lowPrice: product.precio_mayorista,
+                highPrice: product.precio_minorista,
+                priceCurrency: "ARS",
+                offerCount: 2,
+                availability: product.stock > 0
+                  ? "https://schema.org/InStock"
+                  : "https://schema.org/OutOfStock",
+                seller: { "@type": "Organization", name: "Imperio de la Moda" },
+                offers: [
+                  {
+                    "@type": "Offer",
+                    name: "Precio Mayorista",
+                    price: product.precio_mayorista,
+                    priceCurrency: "ARS",
+                    url: `https://imperiolamoda.com.ar/producto/${product.slug}`,
+                  },
+                  {
+                    "@type": "Offer",
+                    name: "Precio Minorista",
+                    price: product.precio_minorista,
+                    priceCurrency: "ARS",
+                    url: `https://imperiolamoda.com.ar/producto/${product.slug}`,
+                  },
+                ],
+              },
             },
-          }),
+            {
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "Inicio", item: "https://imperiolamoda.com.ar" },
+                { "@type": "ListItem", position: 2, name: "Catálogo", item: "https://imperiolamoda.com.ar/catalogo" },
+                { "@type": "ListItem", position: 3, name: product.categoria, item: `https://imperiolamoda.com.ar/catalogo?categoria=${product.categoria}` },
+                { "@type": "ListItem", position: 4, name: product.nombre },
+              ],
+            },
+          ]),
         }}
       />
 

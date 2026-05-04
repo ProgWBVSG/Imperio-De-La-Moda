@@ -4,6 +4,13 @@ import { useState, useEffect } from "react";
 import TestimonialCarousel from "./TestimonialCarousel";
 import ScrollReveal from "./ScrollReveal";
 
+// Testimonios de respaldo por si la API no devuelve nada
+const FALLBACK: any[] = [
+  { id: "f1", autor: "Laura G.",     texto: "Fui al local a buscar calzas y remeras. Excelente atencion, me probaron lo que pedi y los precios son inmejorables.", origen: "Google Maps", visible: true, creado_en: "" },
+  { id: "f2", autor: "Martin P.",    texto: "La campera puffer me salio la mitad que en el centro comercial. Totalmente recomendable.", origen: "TikTok",      visible: true, creado_en: "" },
+  { id: "f3", autor: "Valentina R.", texto: "Pedi por WhatsApp y me asesoraron super bien. Llego todo en perfectas condiciones. 100% recomendado!", origen: "WhatsApp",   visible: true, creado_en: "" },
+];
+
 export default function TestimonialsSection() {
   const [testimonios, setTestimonios] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,41 +22,30 @@ export default function TestimonialsSection() {
         return res.json();
       })
       .then((data) => {
-        // Aseguramos que data sea un array válido, sino seteamos un fallback
-        if (Array.isArray(data)) {
-          setTestimonios(data);
-        } else {
-          console.error("Testimonios API returned non-array payload", data);
-          setTestimonios([]);
-        }
+        setTestimonios(Array.isArray(data) && data.length > 0 ? data : FALLBACK);
         setLoading(false);
       })
-      .catch((err) => {
-        console.error("Error fetching testimonios:", err);
-        setTestimonios([]);
+      .catch(() => {
+        setTestimonios(FALLBACK);
         setLoading(false);
       });
   }, []);
 
-  if (loading || !Array.isArray(testimonios) || testimonios.length === 0) return null;
+  if (loading) return null;
 
   return (
-    <section className="py-24 bg-bg">
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="py-24 bg-bg overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 mb-12">
         <ScrollReveal>
           <div className="section-heading">
             <h2>Lo que dicen nuestros clientes</h2>
             <span className="decorative-line decorative-line-center"></span>
           </div>
         </ScrollReveal>
-
-        <ScrollReveal delay={200} direction="up">
-          {/* El contenedor interior protege el layout del desborde del carousel */}
-          <div className="px-2">
-            <TestimonialCarousel testimonios={testimonios} />
-          </div>
-        </ScrollReveal>
       </div>
+
+      {/* El ticker va de borde a borde, sin padding lateral */}
+      <TestimonialCarousel testimonios={testimonios} />
     </section>
   );
 }

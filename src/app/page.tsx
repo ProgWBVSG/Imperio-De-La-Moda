@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import ScrollReveal from "@/components/ui/ScrollReveal";
 import TestimonialsSection from "@/components/ui/TestimonialsSection";
+import ProductMarquee from "@/components/ui/ProductMarquee";
+import PromoSection from "@/components/ui/PromoSection";
 
 export default function Home() {
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493512336795";
@@ -12,66 +14,52 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-0">
       {/* 1. HERO SECTION */}
-      <section className="relative w-full min-h-[90vh] flex items-center justify-center text-center overflow-hidden">
+      <section className="relative w-full min-h-[70vh] lg:min-h-[600px] lg:max-h-[800px] flex items-center justify-center text-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <Image
-            src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?q=80&w=2070&auto=format&fit=crop"
-            alt="Interior tienda de ropa de moda"
+            src="/banner-inicio.jpeg"
+            alt="Colección Principal Imperio de la Moda"
             fill
-            className="object-cover"
+            className="object-cover object-[65%_top] md:object-top"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/40"></div>
+          <div className="absolute inset-0 bg-black/50 md:hidden"></div>
         </div>
 
-        {/* Elementos decorativos del hero — claramente visibles */}
-        {/* Rombo grande esquina superior izquierda */}
-        <div className="absolute top-[-40px] left-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block" />
-        <div className="absolute top-[10px] left-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block" />
-        {/* Rombo grande esquina inferior derecha */}
-        <div className="absolute bottom-[-40px] right-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block" />
-        <div className="absolute bottom-[10px] right-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block" />
-        {/* Líneas horizontales de acento en los costados */}
-        <div className="absolute left-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-px bg-accent/50" style={{ width: `${24 - i * 4}px` }} />
-          ))}
-        </div>
-        <div className="absolute right-8 top-1/2 -translate-y-1/2 hidden lg:flex flex-col gap-2 items-end">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="h-px bg-accent/50" style={{ width: `${24 - i * 4}px` }} />
-          ))}
-        </div>
-        {/* Círculos flotantes */}
-        <div className="absolute top-20 left-16 w-28 h-28 border border-accent/30 rounded-full animate-float hidden md:block" />
-        <div className="absolute bottom-24 right-20 w-16 h-16 border border-accent/25 rounded-full animate-float delay-300 hidden md:block" />
+        {/* Elementos decorativos del hero */}
+        <div className="absolute top-[-40px] left-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block z-0" />
+        <div className="absolute top-[10px] left-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block z-0" />
+        <div className="absolute bottom-[-40px] right-[-40px] w-48 h-48 border-2 border-accent/40 rotate-45 hidden md:block z-0" />
+        <div className="absolute bottom-[10px] right-[10px] w-36 h-36 border border-accent/20 rotate-45 hidden md:block z-0" />
 
-        <div className="relative z-10 px-6 max-w-4xl flex flex-col items-center">
-          <span className="text-accent text-sm font-bold uppercase tracking-[0.3em] mb-6 animate-fade-in">San Martín 390 · Córdoba</span>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-white mb-6 animate-fade-in-up leading-tight">
-            Ropa de calidad,{" "}
-            <span className="text-accent italic">precio que te conviene</span>
+        <div className="relative z-10 px-6 max-w-7xl mx-auto w-full flex flex-col items-start text-left pt-24 pb-16 md:w-[55%] md:mr-auto">
+          
+          <span className="text-accent text-sm font-bold uppercase tracking-[0.3em] mb-6 animate-fade-in drop-shadow-md">Calidad Premium · Diseño Exclusivo</span>
+          <h1 className="text-4xl md:text-5xl lg:text-[4.2rem] xl:text-[5rem] font-black text-white mb-6 animate-fade-in-up leading-tight drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)] max-w-full">
+            Ropa Mayorista y <br />
+            <span className="text-accent italic drop-shadow-[0_4px_10px_rgba(0,0,0,0.8)]">Minorista en Córdoba</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-300 mb-10 font-medium animate-fade-in-up delay-200 max-w-2xl">
-            Desde <span className="text-white font-bold">$4.000</span> hasta <span className="text-white font-bold">$20.000</span> ARS
-            <span className="text-accent mx-3">·</span>
-            Mayorista y minorista
+          <p className="text-lg md:text-xl text-gray-200 mb-10 font-medium animate-fade-in-up delay-200 max-w-xl drop-shadow-md">
+            Diseñamos y fabricamos calzado e indumentaria con estándares de alta gama. Elevá el catálogo de tu negocio con productos que fidelizan clientes.
+            <br className="hidden md:block"/>
+            <span className="text-accent mt-2 inline-block font-bold">Conviértete en distribuidor oficial hoy.</span>
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto animate-fade-in-up delay-300">
             <Link
               href="/catalogo"
-              className="bg-accent text-primary px-8 py-4 rounded-radius-base font-bold text-lg hover:scale-105 transition-all text-center shadow-lg"
+              className="bg-accent text-primary px-8 py-4 rounded-radius-base font-bold text-lg hover:scale-105 transition-all text-center shadow-[0_0_20px_rgba(201,168,76,0.4)]"
             >
-              Ver catálogo
+              Explorar Colección
             </Link>
             <a
               href={heroWhatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-whatsapp text-white px-8 py-4 rounded-radius-base font-bold text-lg hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-lg"
+              className="bg-black/40 border-2 border-white/20 text-white px-8 py-4 rounded-radius-base font-bold text-lg hover:bg-white hover:text-primary transition-all flex items-center justify-center gap-2 shadow-lg backdrop-blur-md"
             >
-              <span>Escribinos</span>
+              <span>Consultar por mayor</span>
               <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.096-1.332-.116-.399-.129-1.071-.352-2.05-1.127-1.106-.878-1.722-2.087-1.917-2.359-.14-.195-.477-.6-.477-1.163 0-.583.273-.892.4-.103.11-.122.258-.142.35-.142.11 0 .204.004.298.006.115.006.27-.044.423.324.156.377.534 1.304.58 1.402.046.096.082.203.013.344-.069.143-.106.23-.21.353-.105.123-.224.272-.319.349-.107.086-.22.18-.101.385.118.204.526.87 1.134 1.41.785.698 1.439.914 1.644.914.205 0 .324.088.441-.044.116-.134.502-.584.636-.786.134-.202.268-.168.455-.098.188.07.118-.616 1.391-.685.187-.07.31-.105.356-.142.045-.038.045-.195-.098-.6z" /></svg>
             </a>
           </div>
@@ -130,6 +118,12 @@ export default function Home() {
         </div>
       </section>
 
+      {/* 2.5 PRODUCTOS LO MÁS BUSCADO — MARQUEE */}
+      <ProductMarquee />
+
+      {/* 2.6 PROMOS ACTIVAS */}
+      <PromoSection />
+
       {/* 3. ESTADÍSTICAS */}
       <section className="bg-primary py-10 overflow-hidden relative">
         {/* Detalles de fondo: puntos decorativos */}
@@ -174,9 +168,21 @@ export default function Home() {
           </ScrollReveal>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { icon: "💰", title: "Precios desde $4.000", desc: "Ropa asequible con márgenes reales si comprás por mayor. Sin intermediarios." },
-              { icon: "✅", title: "Calidad garantizada", desc: "Telas duraderas, control de costura y garantía de fábrica en cada prenda." },
-              { icon: "💬", title: "Atención directa", desc: "Sin chat bots genéricos. Te respondemos directo por WhatsApp y te asesoramos." },
+              { 
+                icon: <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, 
+                title: "Precios desde $4.000", 
+                desc: "Ropa asequible con márgenes reales si comprás por mayor. Sin intermediarios." 
+              },
+              { 
+                icon: <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, 
+                title: "Calidad garantizada", 
+                desc: "Telas duraderas, control de costura y garantía de fábrica en cada prenda." 
+              },
+              { 
+                icon: <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>, 
+                title: "Atención directa", 
+                desc: "Sin chat bots genéricos. Te respondemos directo por WhatsApp y te asesoramos." 
+              },
             ].map((item, i) => (
               <ScrollReveal key={i} delay={i * 150} direction="up">
               <div className="bg-white p-8 rounded-2xl border border-border shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 text-center group relative overflow-hidden">
@@ -325,6 +331,85 @@ export default function Home() {
           </div>
         </div>
         </ScrollReveal>
+      </section>
+
+      {/* 8. FAQ — SEO Rich Results */}
+      <section className="py-20 px-4 max-w-4xl mx-auto w-full">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: [
+                {
+                  "@type": "Question",
+                  name: "¿Cuál es la compra mínima para precio mayorista?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Para acceder al precio mayorista necesitás comprar un mínimo de 6 prendas. Podés combinar modelos, talles y colores a tu gusto.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "¿Dónde queda Imperio de la Moda?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Estamos en San Martín 382, Centro, Córdoba Capital, Argentina. A pocas cuadras de la Peatonal.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "¿Hacen envíos a todo el país?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Por el momento solo realizamos ventas con retiro en nuestro local de Córdoba, para que puedas verificar la calidad en persona.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "¿Qué medios de pago aceptan?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Aceptamos efectivo (con 10% de descuento adicional) y transferencia bancaria.",
+                  },
+                },
+                {
+                  "@type": "Question",
+                  name: "¿Tienen ropa de mujer, hombre y niños?",
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: "Sí, tenemos ropa para toda la familia: mujer, hombre, niños y accesorios. Desde remeras y jeans hasta camperas y buzos.",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
+
+        <div className="section-heading">
+          <span className="fashion-tag mb-4 mx-auto">Preguntas frecuentes</span>
+          <h2 className="mt-4">¿Tenés dudas?<br /><em className="text-accent">Te las resolvemos</em></h2>
+          <span className="decorative-line decorative-line-center"></span>
+        </div>
+
+        <div className="space-y-4">
+          {[
+            { q: "¿Cuál es la compra mínima para precio mayorista?", a: "Para acceder al precio mayorista necesitás comprar un mínimo de 6 prendas. Podés combinar modelos, talles y colores a tu gusto." },
+            { q: "¿Dónde queda Imperio de la Moda?", a: "Estamos en San Martín 382, Centro, Córdoba Capital, Argentina. A pocas cuadras de la Peatonal." },
+            { q: "¿Hacen envíos a todo el país?", a: "Por el momento solo realizamos ventas con retiro en nuestro local de Córdoba, para que puedas verificar la calidad en persona." },
+            { q: "¿Qué medios de pago aceptan?", a: "Aceptamos efectivo (con 10% de descuento adicional) y transferencia bancaria." },
+            { q: "¿Tienen ropa de mujer, hombre y niños?", a: "Sí, tenemos ropa para toda la familia: mujer, hombre, niños y accesorios. Desde remeras y jeans hasta camperas y buzos." },
+          ].map((faq, i) => (
+            <details key={i} className="group bg-white border border-border rounded-xl shadow-sm overflow-hidden">
+              <summary className="flex items-center justify-between gap-4 px-6 py-5 cursor-pointer font-bold text-primary hover:text-accent transition-colors">
+                <span>{faq.q}</span>
+                <svg className="w-5 h-5 text-accent shrink-0 transition-transform group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+              </summary>
+              <div className="px-6 pb-5 text-gray-600 leading-relaxed">{faq.a}</div>
+            </details>
+          ))}
+        </div>
       </section>
     </div>
   );
