@@ -31,6 +31,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [inited, setInited] = useState(false);
+  const [toast, setToast] = useState<{message: string, id: number} | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("imperio_carrito");
@@ -50,6 +51,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [items, inited]);
 
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast]);
+
   const agregarItem = (newItem: CartItem) => {
     setItems((prev) => {
       const index = prev.findIndex(i => i.id === newItem.id);
@@ -60,6 +68,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       }
       return [...prev, newItem];
     });
+    setToast({ message: `✅ ${newItem.nombre} agregado al carrito`, id: Date.now() });
   };
 
   const quitarItem = (id: string) => {
@@ -184,6 +193,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotal
     }}>
       {children}
+      
+      {/* GLOBAL TOAST NOTIFICATION */}
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-[9999] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-primary text-white px-6 py-4 rounded-xl shadow-2xl border border-white/10 flex items-center gap-3">
+            <span className="font-bold text-sm">{toast.message}</span>
+            <button onClick={() => setToast(null)} className="text-gray-400 hover:text-white transition">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        </div>
+      )}
     </CartContext.Provider>
   );
 }

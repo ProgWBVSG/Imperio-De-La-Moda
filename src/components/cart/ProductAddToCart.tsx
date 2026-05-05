@@ -3,10 +3,14 @@
 import { useState } from "react";
 import { useCart, CartItem } from "@/context/CartContext";
 import Link from "next/link";
+import SizeGuideModal from "@/components/ui/SizeGuideModal";
+
+import { useFavorites } from "@/context/FavoritesContext";
 
 interface ProductProps {
   product: {
     id: string;
+    slug?: string;
     nombre: string;
     precio_mayorista: number;
     precio_minorista: number;
@@ -14,6 +18,10 @@ interface ProductProps {
     colores: string[];
     fotos: string[];
     stock: number;
+    categoria?: string;
+    en_promo?: boolean;
+    precio_minorista_promo?: number;
+    precio_mayorista_promo?: number;
   };
 }
 
@@ -24,6 +32,7 @@ export function ProductAddToCart({ product }: ProductProps) {
   const [selectedColor, setSelectedColor] = useState(product.colores[0] || "");
   const [cantidad, setCantidad] = useState(1);
   const [agregado, setAgregado] = useState(false);
+  const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
 
   const handleAdd = () => {
     if (product.stock <= 0) return;
@@ -59,53 +68,72 @@ export function ProductAddToCart({ product }: ProductProps) {
     <div className="bg-white border border-border p-6 rounded-xl shadow-sm space-y-6 mb-8">
       {/* Selectores */}
       <div className="space-y-5">
-        {product.talles.length > 0 && (
-          <div>
-            <label className="block text-sm font-bold text-primary mb-2.5 uppercase tracking-wider">
-              Talle
-              <span className="ml-2 text-accent font-normal normal-case tracking-normal">— {selectedTalle || "Elegí uno"}</span>
+        {/* Talles */}
+        <div>
+          <div className="flex justify-between items-end mb-2">
+            <label className="block text-xs font-bold text-primary uppercase tracking-wider">
+              Talle: <span className="text-gray-500 font-normal capitalize">{selectedTalle}</span>
             </label>
-            <div className="flex flex-wrap gap-2">
-              {product.talles.map((t) => (
+            <button 
+              onClick={() => setIsSizeGuideOpen(true)}
+              className="text-[11px] text-accent font-bold uppercase flex items-center gap-1 hover:underline hover:text-primary transition-colors"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" />
+              </svg>
+              Guía de talles
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {product.talles && product.talles.length > 0 ? (
+              product.talles.map((t) => (
                 <button
                   key={t}
                   onClick={() => setSelectedTalle(t)}
-                  className={`min-w-[3rem] h-11 px-3 flex items-center justify-center font-bold text-sm border rounded-lg transition-all ${
+                  className={`min-w-[3rem] h-10 px-3 flex items-center justify-center font-bold text-sm rounded-md transition-all border-2 ${
                     selectedTalle === t
-                      ? "border-primary bg-primary text-white shadow-sm"
-                      : "border-border text-primary hover:border-accent hover:text-accent"
+                      ? "border-accent bg-accent/10 text-primary shadow-sm ring-1 ring-accent/50"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
                   }`}
                 >
                   {t}
                 </button>
-              ))}
-            </div>
+              ))
+            ) : (
+              <span className="h-10 px-4 flex items-center justify-center font-bold text-sm rounded-md border-2 border-accent bg-accent/10 text-primary cursor-default">
+                Único
+              </span>
+            )}
           </div>
-        )}
+        </div>
 
-        {product.colores.length > 0 && (
-          <div>
-            <label className="block text-sm font-bold text-primary mb-2.5 uppercase tracking-wider">
-              Color
-              <span className="ml-2 text-accent font-normal normal-case tracking-normal">— {selectedColor || "Elegí uno"}</span>
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {product.colores.map((c) => (
+        {/* Colores */}
+        <div>
+          <label className="block text-xs font-bold text-primary mb-2 uppercase tracking-wider">
+            Color: <span className="text-gray-500 font-normal capitalize">{selectedColor}</span>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {product.colores && product.colores.length > 0 ? (
+              product.colores.map((c) => (
                 <button
                   key={c}
                   onClick={() => setSelectedColor(c)}
-                  className={`px-4 py-2.5 font-bold text-sm border rounded-lg transition-all ${
+                  className={`px-4 h-10 flex items-center justify-center font-bold text-sm rounded-md transition-all border-2 ${
                     selectedColor === c
-                      ? "border-primary bg-primary text-white shadow-sm"
-                      : "border-border text-primary hover:border-accent hover:text-accent"
+                      ? "border-accent bg-accent/10 text-primary shadow-sm ring-1 ring-accent/50"
+                      : "border-gray-200 text-gray-600 hover:border-gray-300 bg-white"
                   }`}
                 >
                   {c}
                 </button>
-              ))}
-            </div>
+              ))
+            ) : (
+              <span className="h-10 px-4 flex items-center justify-center font-bold text-sm rounded-md border-2 border-accent bg-accent/10 text-primary cursor-default">
+                Único
+              </span>
+            )}
           </div>
-        )}
+        </div>
 
         <div>
           <label className="block text-sm font-bold text-primary mb-2.5 uppercase tracking-wider">Cantidad</label>
@@ -135,19 +163,53 @@ export function ProductAddToCart({ product }: ProductProps) {
 
       {/* Botones de acción */}
       <div className="flex flex-col gap-3 pt-5 border-t border-border">
-        <button
-          onClick={handleAdd}
-          disabled={product.stock <= 0}
-          className={`w-full py-4 rounded-lg font-bold text-base text-center transition-all ${
-            product.stock <= 0
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : agregado
-              ? "bg-green-500 text-white shadow-lg scale-[1.02]"
-              : "bg-primary text-white hover:bg-opacity-90 hover:shadow-md active:scale-[0.98]"
-          }`}
-        >
-          {product.stock <= 0 ? "Sin Stock" : agregado ? "✓ ¡Agregado al carrito!" : "Agregar al Carrito"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAdd}
+            disabled={product.stock <= 0}
+            className={`flex-1 py-4 rounded-lg font-bold text-base text-center transition-all ${
+              product.stock <= 0
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : agregado
+                ? "bg-green-500 text-white shadow-lg scale-[1.02]"
+                : "bg-primary text-white hover:bg-opacity-90 hover:shadow-md active:scale-[0.98]"
+            }`}
+          >
+            {product.stock <= 0 ? "Sin Stock" : agregado ? "✓ ¡Agregado al carrito!" : "Agregar al Carrito"}
+          </button>
+          
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              toggleFavorite({
+                id: product.id,
+                slug: product.slug || "",
+                nombre: product.nombre,
+                categoria: product.categoria || "",
+                precio_mayorista: product.precio_mayorista,
+                precio_minorista: product.precio_minorista,
+                imagen: product.fotos[0] || "",
+                en_promo: product.en_promo,
+                precio_minorista_promo: product.precio_minorista_promo,
+                precio_mayorista_promo: product.precio_mayorista_promo
+              });
+            }}
+            className={`w-14 shrink-0 flex items-center justify-center rounded-lg border-2 transition-all ${
+              isFavorite(product.id)
+                ? "border-red-500 bg-red-50 text-red-500 hover:bg-red-100"
+                : "border-border text-gray-400 hover:border-red-500 hover:text-red-500"
+            }`}
+            aria-label="Toggle favorito"
+          >
+            <svg 
+              className={`w-6 h-6 transition-colors ${isFavorite(product.id) ? 'fill-red-500' : 'fill-none'}`} 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite(product.id) ? 0 : 2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+        </div>
 
         {agregado && (
           <Link
@@ -170,6 +232,12 @@ export function ProductAddToCart({ product }: ProductProps) {
           <span>Comprar por WhatsApp</span>
         </a>
       </div>
+      {/* Modal de Guía de Talles */}
+      <SizeGuideModal 
+        isOpen={isSizeGuideOpen} 
+        onClose={() => setIsSizeGuideOpen(false)} 
+        category={product.categoria} 
+      />
     </div>
   );
 }

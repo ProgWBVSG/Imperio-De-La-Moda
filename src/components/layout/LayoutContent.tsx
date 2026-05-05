@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
 import ChatbotWidget from "@/components/ui/ChatbotWidget";
 
-export default function LayoutContent({ children }: { children: React.ReactNode }) {
+export default function LayoutContent({ children, announcement }: { children: React.ReactNode, announcement?: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
 
@@ -15,10 +15,13 @@ export default function LayoutContent({ children }: { children: React.ReactNode 
     return <>{children}</>;
   }
 
-  // Sitio público: con navbar, footer, chatbot, WhatsApp
+  // Sitio público: header sticky con announcement + navbar
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      <div className="sticky top-0 w-full z-50 flex flex-col">
+        {announcement}
+        <Navbar />
+      </div>
       <main className="flex-grow">{children}</main>
       <Footer />
       <WhatsAppButton />

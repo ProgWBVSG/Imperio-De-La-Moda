@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/lib/auth";
-import { SUPABASE_URL, getSupabaseHeaders } from "@/lib/supabase";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -7,12 +7,39 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   if (authError) return authError;
   try {
     const { id } = await params;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { headers: getSupabaseHeaders() });
-    const data = await res.json();
-    if (!data.length) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
-    const p = data[0];
-    return NextResponse.json({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")});
-  } catch {
+    
+    const p = await prisma.producto.findUnique({ where: { id } });
+    if (!p) return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    
+    // Calcular ventas e ingresos buscando pedidos
+    const pedidos = await prisma.pedido.findMany({ select: { items: true } });
+    let totalVentas = 0;
+    let totalIngresos = 0;
+
+    pedidos.forEach(pedido => {
+      try {
+        const items = JSON.parse(pedido.items);
+        items.forEach((item: any) => {
+          if (item.nombre === p.nombre) {
+            totalVentas += item.cantidad;
+            totalIngresos += (item.precio * item.cantidad);
+          }
+        });
+      } catch (e) {}
+    });
+
+    return NextResponse.json({
+        ...p, 
+        talles: JSON.parse(p.talles||"[]"), 
+        colores: JSON.parse(p.colores||"[]"), 
+        fotos: JSON.parse(p.fotos||"[]"), 
+        stock_por_talle: JSON.parse(p.stock_por_talle||"{}"),
+        productos_relacionados: JSON.parse(p.productos_relacionados||"[]"),
+        ventas_totales: totalVentas,
+        ingresos_totales: totalIngresos
+    });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Error" }, { status: 500 });
   }
 }
@@ -37,17 +64,28 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
         colores: JSON.stringify(body.colores || []),
         stock_por_talle: JSON.stringify(stockPorTalle),
         fotos: JSON.stringify(body.fotos || []),
+        productos_relacionados: JSON.stringify(body.productos_relacionados || []),
         stock: stockTotal,
         oculto: body.oculto,
         destacado: body.destacado,
         novedad: body.novedad,
-        actualizado_en: new Date().toISOString()
     };
 
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { method: "PATCH", headers: getSupabaseHeaders(), body: JSON.stringify(payload) });
-    const [p] = await res.json();
-    return NextResponse.json({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")});
-  } catch {
+    const p = await prisma.producto.update({
+        where: { id },
+        data: payload
+    });
+
+    return NextResponse.json({
+        ...p, 
+        talles: JSON.parse(p.talles||"[]"), 
+        colores: JSON.parse(p.colores||"[]"), 
+        fotos: JSON.parse(p.fotos||"[]"), 
+        stock_por_talle: JSON.parse(p.stock_por_talle||"{}"),
+        productos_relacionados: JSON.parse(p.productos_relacionados||"[]")
+    });
+  } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Error al actualizar" }, { status: 500 });
   }
 }
@@ -57,7 +95,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   if (authError) return authError;
   try {
     const { id } = await params;
-    await fetch(`${SUPABASE_URL}/rest/v1/Producto?id=eq.${id}`, { method: "DELETE", headers: getSupabaseHeaders() });
+    await prisma.producto.delete({ where: { id } });
     return new NextResponse(null, { status: 204 });
   } catch {
     return NextResponse.json({ error: "Error" }, { status: 500 });

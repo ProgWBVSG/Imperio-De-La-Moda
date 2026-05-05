@@ -79,15 +79,54 @@ export default function StockAdmin() {
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold">📦 Stock rápido</h1>
-          <p className="text-sm" style={{ color: "var(--admin-text-muted)" }}>Editá el stock de cada talle directamente. Se guarda al salir del campo.</p>
+          <h1 className="text-2xl font-bold">📦 Stock</h1>
+          <p className="text-sm" style={{ color: "var(--admin-text-muted)" }}>Gestioná tu inventario manualmente o mediante Excel inteligente.</p>
         </div>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" checked={soloStockBajo} onChange={() => setSoloStockBajo(!soloStockBajo)} />
-          <span className="text-sm font-bold" style={{ color: "var(--admin-text-muted)" }}>Solo stock bajo</span>
-        </label>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox" checked={soloStockBajo} onChange={() => setSoloStockBajo(!soloStockBajo)} />
+            <span className="text-sm font-bold" style={{ color: "var(--admin-text-muted)" }}>Solo stock bajo</span>
+          </label>
+          
+          <div className="relative">
+            <input 
+              type="file" 
+              id="excel-upload" 
+              accept=".xlsx,.csv" 
+              className="hidden" 
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                
+                showToast("Analizando y procesando Excel (IA)...");
+                const formData = new FormData();
+                formData.append("file", file);
+                
+                try {
+                  const res = await fetch("/api/admin/importar", { method: "POST", body: formData });
+                  const data = await res.json();
+                  if (data.error) {
+                    showToast("❌ " + data.error);
+                  } else {
+                    showToast("✅ " + data.mensaje);
+                    // Forzar recarga de los productos
+                    setTimeout(() => window.location.reload(), 2000);
+                  }
+                } catch (err) {
+                  showToast("❌ Error de red al procesar el archivo.");
+                }
+              }}
+            />
+            <label 
+              htmlFor="excel-upload" 
+              className="admin-btn admin-btn-primary flex items-center gap-2 cursor-pointer shadow-lg hover:scale-105 transition-transform"
+            >
+              <span>📄</span> Carga Masiva (Excel)
+            </label>
+          </div>
+        </div>
       </div>
 
       <div className="admin-card overflow-x-auto">

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, Link as LinkIcon, Search } from "lucide-react";
 
 const TALLES_DISPONIBLES = ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46"];
 const CATEGORIAS = ["Mujer", "Hombre", "Niños", "Accesorios"];
@@ -43,6 +44,16 @@ export default function NuevoProducto() {
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
   const [errores, setErrores] = useState<string[]>([]);
+  const [productosRelacionados, setProductosRelacionados] = useState<string[]>([]);
+  const [todosProductos, setTodosProductos] = useState<any[]>([]);
+  const [buscarRelacionado, setBuscarRelacionado] = useState("");
+
+  useEffect(() => {
+    fetch(`/api/admin/productos?estado=activos`)
+      .then(res => res.json())
+      .then(data => setTodosProductos(data || []))
+      .catch(() => {});
+  }, []);
 
   const todosLosTalles = [...TALLES_DISPONIBLES, ...tallesExtra];
 
@@ -99,6 +110,12 @@ export default function NuevoProducto() {
     setFotos(prev => prev.filter((_, i) => i !== index));
   };
 
+  const toggleProductoRelacionado = (prodId: string) => {
+    setProductosRelacionados(prev => 
+      prev.includes(prodId) ? prev.filter(x => x !== prodId) : [...prev, prodId]
+    );
+  };
+
   const handleGuardar = async (publicar: boolean) => {
     const errs: string[] = [];
     if (!nombre.trim()) errs.push("Nombre del producto");
@@ -128,6 +145,7 @@ export default function NuevoProducto() {
           colores,
           stock_por_talle: tallesSeleccionados,
           fotos,
+          productos_relacionados: productosRelacionados,
           oculto: !publicar && !activo,
           destacado,
           novedad,
@@ -335,7 +353,51 @@ export default function NuevoProducto() {
         </div>
       </div>
 
-      {/* CAMPO 7 — SEO */}
+      {/* CAMPO 7 — Productos Relacionados */}
+      <div className="admin-card mb-6">
+        <div className="mb-4">
+          <h2 className="font-bold text-base flex items-center gap-2"><LinkIcon size={18} /> Recomendaciones (Cross-Selling)</h2>
+          <p className="text-xs mt-1" style={{ color: "var(--admin-text-muted)" }}>Seleccioná productos específicos para recomendar. Si dejás esto vacío, la IA recomendará automáticamente basándose en la categoría.</p>
+        </div>
+        
+        <div className="relative mb-4">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={16} className="text-gray-500" />
+          </div>
+          <input 
+            type="text" 
+            value={buscarRelacionado} 
+            onChange={(e) => setBuscarRelacionado(e.target.value)}
+            placeholder="Buscar producto para relacionar..." 
+            className="admin-input pl-10"
+          />
+        </div>
+
+        <div className="max-h-64 overflow-y-auto pr-2 space-y-2">
+          {todosProductos
+            .filter(p => p.nombre.toLowerCase().includes(buscarRelacionado.toLowerCase()) || p.categoria.toLowerCase().includes(buscarRelacionado.toLowerCase()))
+            .map(p => {
+              const seleccionado = productosRelacionados.includes(p.id);
+              return (
+                <label key={p.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${seleccionado ? 'border-accent bg-accent/10' : 'border-gray-800 hover:bg-white/5'}`}>
+                  <input 
+                    type="checkbox" 
+                    checked={seleccionado}
+                    onChange={() => toggleProductoRelacionado(p.id)}
+                    className="w-4 h-4 rounded border-gray-600 text-accent focus:ring-accent bg-gray-900"
+                  />
+                  <div className="flex-1">
+                    <p className="font-bold text-sm">{p.nombre}</p>
+                    <p className="text-xs text-gray-500">{p.categoria}</p>
+                  </div>
+                </label>
+              );
+            })}
+          {todosProductos.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No hay otros productos disponibles.</p>}
+        </div>
+      </div>
+
+      {/* CAMPO 8 — SEO */}
       <details className="admin-card mb-6">
         <summary className="font-bold text-base cursor-pointer" style={{ color: "var(--admin-text-muted)" }}>
           🔍 SEO (opcional)

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
+import { Eye, Package, DollarSign, Activity, Link as LinkIcon, Camera, Edit3, Tag, Ruler, Palette, Search } from "lucide-react";
 
 const TALLES_DISPONIBLES = ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46"];
 const CATEGORIAS = ["Mujer", "Hombre", "Niños", "Accesorios"];
@@ -45,6 +46,15 @@ export default function EditarProducto() {
   const [destacado, setDestacado] = useState(false);
   const [novedad, setNovedad] = useState(false);
   const [fotos, setFotos] = useState<string[]>([]);
+  const [productosRelacionados, setProductosRelacionados] = useState<string[]>([]);
+  const [todosProductos, setTodosProductos] = useState<any[]>([]);
+  const [buscarRelacionado, setBuscarRelacionado] = useState("");
+  
+  // Métricas
+  const [vistas, setVistas] = useState(0);
+  const [ventasTotales, setVentasTotales] = useState(0);
+  const [ingresosTotales, setIngresosTotales] = useState(0);
+
   const [guardando, setGuardando] = useState(false);
   const [guardado, setGuardado] = useState(false);
 
@@ -68,9 +78,19 @@ export default function EditarProducto() {
         setDestacado(p.destacado);
         setNovedad(p.novedad);
         setFotos(p.fotos || []);
+        setProductosRelacionados(p.productos_relacionados || []);
+        setVistas(p.vistas || 0);
+        setVentasTotales(p.ventas_totales || 0);
+        setIngresosTotales(p.ingresos_totales || 0);
         setLoading(false);
       })
       .catch(() => { setNotFound(true); setLoading(false); });
+
+    // Cargar todos los productos para cross-selling
+    fetch(`/api/admin/productos?estado=activos`)
+      .then(res => res.json())
+      .then(data => setTodosProductos(data || []))
+      .catch(() => {});
   }, [id]);
 
   if (loading) {
@@ -127,6 +147,12 @@ export default function EditarProducto() {
     }
   };
 
+  const toggleProductoRelacionado = (prodId: string) => {
+    setProductosRelacionados(prev => 
+      prev.includes(prodId) ? prev.filter(x => x !== prodId) : [...prev, prodId]
+    );
+  };
+
   const handleFotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
@@ -157,6 +183,7 @@ export default function EditarProducto() {
           colores,
           stock_por_talle: tallesSeleccionados,
           fotos,
+          productos_relacionados: productosRelacionados,
           oculto: !activo,
           destacado,
           novedad,
@@ -173,7 +200,7 @@ export default function EditarProducto() {
 
   return (
     <div className="p-4 md:p-8 max-w-4xl mx-auto pb-12">
-      <div className="flex items-center gap-3 mb-8">
+      <div className="flex items-center gap-3 mb-6">
         <Link href="/admin/productos" className="admin-btn admin-btn-ghost">← Volver</Link>
         <div>
           <h1 className="text-2xl font-bold">Editar producto</h1>
@@ -181,9 +208,28 @@ export default function EditarProducto() {
         </div>
       </div>
 
+      {/* Métricas de Rendimiento */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        <div className="admin-card py-4 flex flex-col items-center justify-center text-center">
+          <Eye className="text-blue-400 mb-2" size={24} />
+          <p className="text-2xl font-bold text-blue-400">{vistas}</p>
+          <p className="text-xs uppercase font-bold" style={{ color: "var(--admin-text-muted)" }}>Vistas Orgánicas</p>
+        </div>
+        <div className="admin-card py-4 flex flex-col items-center justify-center text-center">
+          <Package className="text-green-400 mb-2" size={24} />
+          <p className="text-2xl font-bold text-green-400">{ventasTotales}</p>
+          <p className="text-xs uppercase font-bold" style={{ color: "var(--admin-text-muted)" }}>Unidades Vendidas</p>
+        </div>
+        <div className="admin-card py-4 flex flex-col items-center justify-center text-center">
+          <DollarSign className="text-yellow-400 mb-2" size={24} />
+          <p className="text-2xl font-bold text-yellow-400">${ventasTotales > 0 ? (ingresosTotales).toLocaleString("es-AR") : "0"}</p>
+          <p className="text-xs uppercase font-bold" style={{ color: "var(--admin-text-muted)" }}>Ingresos Brutos</p>
+        </div>
+      </div>
+
       {/* Fotos */}
       <div className="admin-card mb-6">
-        <h2 className="font-bold text-base mb-4">📸 Fotos</h2>
+        <h2 className="font-bold text-base mb-4 flex items-center gap-2"><Camera size={18} /> Fotos</h2>
         <div className="flex flex-wrap gap-3">
           {fotos.map((foto, i) => (
             <div key={i} className="relative w-24 h-28 rounded-lg overflow-hidden group bg-gray-800">
@@ -203,7 +249,7 @@ export default function EditarProducto() {
 
       {/* Info */}
       <div className="admin-card mb-6 space-y-4">
-        <h2 className="font-bold text-base">📝 Información</h2>
+        <h2 className="font-bold text-base flex items-center gap-2"><Edit3 size={18} /> Información</h2>
         <div>
           <label className="block text-xs font-bold mb-1.5 uppercase" style={{ color: "var(--admin-text-muted)" }}>Nombre *</label>
           <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className="admin-input" />
@@ -226,7 +272,7 @@ export default function EditarProducto() {
 
       {/* Precios */}
       <div className="admin-card mb-6">
-        <h2 className="font-bold text-base mb-4">💰 Precios</h2>
+        <h2 className="font-bold text-base mb-4 flex items-center gap-2"><Tag size={18} /> Precios</h2>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-bold mb-1.5 uppercase" style={{ color: "var(--admin-text-muted)" }}>Minorista *</label>
@@ -241,7 +287,7 @@ export default function EditarProducto() {
 
       {/* Talles */}
       <div className="admin-card mb-6">
-        <h2 className="font-bold text-base mb-4">📏 Talles y stock</h2>
+        <h2 className="font-bold text-base mb-4 flex items-center gap-2"><Ruler size={18} /> Talles y stock</h2>
         <div className="flex flex-wrap gap-2 mb-3">
           {todosLosTalles.map(t => (
             <button key={t} onClick={() => toggleTalle(t)} className="w-12 h-10 rounded-lg text-sm font-bold transition-all" style={{ background: tallesSeleccionados[t] !== undefined ? "var(--admin-accent)" : "var(--admin-bg)", border: `1px solid ${tallesSeleccionados[t] !== undefined ? "var(--admin-accent)" : "var(--admin-border)"}`, color: tallesSeleccionados[t] !== undefined ? "#0D0D0D" : "var(--admin-text-muted)" }}>
@@ -269,7 +315,7 @@ export default function EditarProducto() {
 
       {/* Colores */}
       <div className="admin-card mb-6">
-        <h2 className="font-bold text-base mb-4">🎨 Colores</h2>
+        <h2 className="font-bold text-base mb-4 flex items-center gap-2"><Palette size={18} /> Colores</h2>
         <div className="flex flex-wrap gap-2 mb-4">
           {COLORES_PREDEFINIDOS.map(c => (
             <button key={c.nombre} onClick={() => toggleColor(c.nombre)} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all" style={{ background: colores.includes(c.nombre) ? "var(--admin-accent)" : "var(--admin-bg)", border: `1px solid ${colores.includes(c.nombre) ? "var(--admin-accent)" : "var(--admin-border)"}`, color: colores.includes(c.nombre) ? "#0D0D0D" : "var(--admin-text-muted)" }}>
@@ -286,7 +332,7 @@ export default function EditarProducto() {
 
       {/* Visibilidad */}
       <div className="admin-card mb-6">
-        <h2 className="font-bold text-base mb-4">👁️ Visibilidad</h2>
+        <h2 className="font-bold text-base mb-4 flex items-center gap-2"><Eye size={18} /> Visibilidad</h2>
         <div className="space-y-4">
           {[
             { label: "Activo", desc: "Visible en la web", value: activo, set: setActivo },
@@ -305,6 +351,51 @@ export default function EditarProducto() {
               </div>
             </label>
           ))}
+        </div>
+      </div>
+
+      {/* Productos Relacionados */}
+      <div className="admin-card mb-6">
+        <div className="mb-4">
+          <h2 className="font-bold text-base flex items-center gap-2"><LinkIcon size={18} /> Recomendaciones (Cross-Selling)</h2>
+          <p className="text-xs mt-1" style={{ color: "var(--admin-text-muted)" }}>Seleccioná productos específicos para recomendar. Si dejás esto vacío, la IA recomendará automáticamente basándose en la categoría.</p>
+        </div>
+        
+        <div className="relative mb-4">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search size={16} className="text-gray-500" />
+          </div>
+          <input 
+            type="text" 
+            value={buscarRelacionado} 
+            onChange={(e) => setBuscarRelacionado(e.target.value)}
+            placeholder="Buscar producto para relacionar..." 
+            className="admin-input pl-10"
+          />
+        </div>
+
+        <div className="max-h-64 overflow-y-auto pr-2 space-y-2">
+          {todosProductos
+            .filter(p => p.id !== id)
+            .filter(p => p.nombre.toLowerCase().includes(buscarRelacionado.toLowerCase()) || p.categoria.toLowerCase().includes(buscarRelacionado.toLowerCase()))
+            .map(p => {
+              const seleccionado = productosRelacionados.includes(p.id);
+              return (
+                <label key={p.id} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${seleccionado ? 'border-accent bg-accent/10' : 'border-gray-800 hover:bg-white/5'}`}>
+                  <input 
+                    type="checkbox" 
+                    checked={seleccionado}
+                    onChange={() => toggleProductoRelacionado(p.id)}
+                    className="w-4 h-4 rounded border-gray-600 text-accent focus:ring-accent bg-gray-900"
+                  />
+                  <div className="flex-1">
+                    <p className="font-bold text-sm">{p.nombre}</p>
+                    <p className="text-xs text-gray-500">{p.categoria}</p>
+                  </div>
+                </label>
+              );
+            })}
+          {todosProductos.length === 0 && <p className="text-sm text-gray-500 text-center py-4">No hay otros productos disponibles.</p>}
         </div>
       </div>
 

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { Playfair_Display, DM_Sans } from "next/font/google";
 import { CartProvider } from "@/context/CartContext";
+import { FavoritesProvider } from "@/context/FavoritesContext";
 import LayoutContent from "@/components/layout/LayoutContent";
+import ServerAnnouncementBar from "@/components/layout/ServerAnnouncementBar";
+import AnnouncementWrapper from "@/components/layout/AnnouncementWrapper";
+import { ClarityAnalytics } from "@/components/analytics/ClarityAnalytics";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -152,13 +156,17 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaLocalBusiness) }}
         />
+        <ClarityAnalytics />
       </head>
       <body>
-        <CartProvider>
-          <LayoutContent>{children}</LayoutContent>
-        </CartProvider>
+        <FavoritesProvider>
+          <CartProvider>
+            <LayoutContent announcement={<ServerAnnouncementBar />}>
+              {children}
+            </LayoutContent>
+          </CartProvider>
+        </FavoritesProvider>
       </body>
     </html>
   );
 }
-

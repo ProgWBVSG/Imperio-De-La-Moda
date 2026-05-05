@@ -47,6 +47,7 @@ export async function GET(req: Request) {
         colores: JSON.parse(p.colores||"[]"),
         fotos: JSON.parse(p.fotos||"[]"),
         stock_por_talle: JSON.parse(p.stock_por_talle||"{}"),
+        productos_relacionados: JSON.parse(p.productos_relacionados||"[]"),
       };
 
       // Enrich with promo info

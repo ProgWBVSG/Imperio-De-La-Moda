@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
+import GlobalSearch from '@/components/ui/GlobalSearch';
 
 const CATALOG_CATEGORIES = [
   { label: "Todo el catalogo", href: "/catalogo",                      icon: "M4 6h16M4 10h16M4 14h16M4 18h16" },
@@ -49,67 +51,77 @@ function MobileCatalogMenu({ onClose }: { onClose: () => void }) {
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
-  const pathname = usePathname();
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { cantidadTotal } = useCart();
+  const { favoritesCount } = useFavorites();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="bg-primary text-bg sticky top-0 z-50 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-20">
-
-          {/* Logo */}
-          <div className="flex items-center">
-            <Link href="/" className="flex items-center">
-              <Image src="/logo-imperio.png" alt="Imperio de la Moda" width={140} height={50} className="h-12 w-auto object-contain" priority />
-            </Link>
-          </div>
+    <>
+      <nav
+        className={`w-full z-50 transition-all duration-300 ${
+          isScrolled ? "bg-primary/95 backdrop-blur-md shadow-lg py-2" : "bg-primary py-4"
+        }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
+          {/* LOGO */}
+          <Link href="/" className="flex items-center gap-2 group z-50">
+            <div className="relative w-20 h-10 md:w-24 md:h-12">
+              <Image src="/logo-imperio.png" alt="Imperio de la Moda" fill className="object-contain filter drop-shadow-md group-hover:scale-105 transition-transform" priority />
+            </div>
+          </Link>
 
           {/* MENU DESKTOP */}
-          <div className="hidden md:flex items-center space-x-8 text-sm font-medium">
-
-            {/* Catalogo con dropdown */}
+          <div className="hidden md:flex items-center space-x-8 font-bold text-sm tracking-wide text-bg">
             <div className="relative group">
-              <Link
-                href="/catalogo"
-                className="hover:text-accent transition-colors flex items-center gap-1"
-              >
-                Catalogo
-                <svg
-                  className="w-3 h-3 mt-px transition-transform duration-200 group-hover:rotate-180"
-                  fill="none" viewBox="0 0 24 24" stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                </svg>
+              <Link href="/catalogo" className="hover:text-accent transition-colors flex items-center gap-1 py-4">
+                Catálogo
+                <svg className="w-4 h-4 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
               </Link>
-
-              {/* Dropdown panel */}
-              <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden w-56">
-                  <div className="px-4 py-2.5 bg-accent/5 border-b border-gray-100">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Colecciones</span>
-                  </div>
-                  {CATALOG_CATEGORIES.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-gray-800 hover:bg-accent/5 hover:text-accent transition-colors border-b border-gray-100 last:border-0"
-                    >
-                      <svg className="w-4 h-4 text-accent/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={item.icon} />
-                      </svg>
-                      {item.label}
-                    </Link>
-                  ))}
-                </div>
+              
+              <div className="absolute top-full left-0 bg-white shadow-xl rounded-xl border border-gray-100 py-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0">
+                <Link href="/catalogo/remeras" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Remeras y Musculosas</Link>
+                <Link href="/catalogo/pantalones" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Pantalones y Jeans</Link>
+                <Link href="/catalogo/abrigos" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Buzos y Camperas</Link>
+                <Link href="/catalogo/promos" className="block px-5 py-2.5 text-red-600 font-bold hover:bg-red-50 transition-colors">🔥 Promociones</Link>
               </div>
             </div>
-
+            
             <Link href="/mayoristas" className="hover:text-accent transition-colors">Mayoristas</Link>
             <Link href="/nosotros"   className="hover:text-accent transition-colors">Nosotros</Link>
           </div>
 
           {/* ACCIONES DESKTOP */}
           <div className="hidden md:flex items-center space-x-6">
+            <button 
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 text-bg hover:text-accent transition-colors flex items-center justify-center"
+              aria-label="Buscar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            
+            <Link href="/favoritos" className="relative p-2 text-bg hover:text-accent transition-colors flex items-center justify-center">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {favoritesCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-accent rounded-full">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
+
             <Link href="/carrito" className="relative p-2 text-bg hover:text-accent transition-colors flex items-center justify-center">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -131,6 +143,25 @@ export default function Navbar() {
 
           {/* MENU MOBILE TOGGLE */}
           <div className="md:hidden flex items-center space-x-4">
+            <button 
+              onClick={() => setIsSearchOpen(true)}
+              className="p-2 text-bg hover:text-accent transition-colors"
+              aria-label="Buscar"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            <Link href="/favoritos" className="relative p-2 text-bg hover:text-accent transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              {favoritesCount > 0 && (
+                <span className="absolute top-0 right-0 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white transform translate-x-1/4 -translate-y-1/4 bg-accent rounded-full">
+                  {favoritesCount}
+                </span>
+              )}
+            </Link>
             <Link href="/carrito" className="relative p-2 text-bg hover:text-accent transition-colors">
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -152,7 +183,6 @@ export default function Navbar() {
             </button>
           </div>
         </div>
-      </div>
 
       {/* MENU MOBILE */}
       {isOpen && (
@@ -171,6 +201,9 @@ export default function Navbar() {
           </div>
         </div>
       )}
+      {/* Global Search Overlay */}
+      <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </nav>
+    </>
   );
 }

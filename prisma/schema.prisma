@@ -22,6 +22,8 @@ model Producto {
   stock_por_talle  String   @default("{}")      // JSON string: {"S":5,"M":3}
   fotos            String   @default("[]")      // JSON string: URLs
   stock            Int      @default(0)         // stock total (calculado)
+  vistas           Int      @default(0)         // Contador de visitas orgánicas
+  productos_relacionados String @default("[]")  // JSON string: array of Product IDs
   oculto           Boolean  @default(false)
   destacado        Boolean  @default(false)
   novedad          Boolean  @default(true)
@@ -44,4 +46,32 @@ model Pedido {
   
   creado_en        DateTime @default(now())
   actualizado_en   DateTime @updatedAt
+}
+
+model Configuracion {
+  key              String   @id
+  value            String   // Almacenará JSON string con la configuración
+  actualizado_en   DateTime @updatedAt
+}
+
+model Lead {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String   @unique
+  creado_en DateTime @default(now())
+}
+
+model AdminTask {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @default("")
+  status      String   @default("TODO")      // TODO, IN_PROGRESS, REVIEW, DONE
+  priority    String   @default("NORMAL")    // LOW, NORMAL, HIGH, URGENT
+  tags        String   @default("[]")        // JSON string of tags
+  checklist   String   @default("[]")        // JSON string of {id, text, completed}
+  position    Int      @default(0)           // Order in the column
+  due_date    DateTime?
+  
+  creado_en   DateTime @default(now())
+  actualizado_en DateTime @updatedAt
 }

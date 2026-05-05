@@ -6,6 +6,8 @@ import ScrollReveal from "@/components/ui/ScrollReveal";
 import TestimonialsSection from "@/components/ui/TestimonialsSection";
 import ProductMarquee from "@/components/ui/ProductMarquee";
 import PromoSection from "@/components/ui/PromoSection";
+import PromoModal from "@/components/ui/PromoModal";
+import NewsletterSection from "@/components/ui/NewsletterSection";
 
 export default function Home() {
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "5493512336795";
@@ -13,8 +15,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-0">
+      <PromoModal />
       {/* 1. HERO SECTION */}
-      <section className="relative w-full min-h-[70vh] lg:min-h-[600px] lg:max-h-[800px] flex items-center justify-center text-center overflow-hidden">
+      <section className="relative w-full min-h-[70vh] lg:min-h-[600px] lg:max-h-[800px] flex items-center justify-center text-center overflow-hidden mt-[72px] md:mt-[80px]">
         <div className="absolute inset-0 z-0">
           <Image
             src="/banner-inicio.jpeg"
@@ -411,6 +414,9 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* SECCIÓN NEWSLETTER */}
+      <NewsletterSection />
     </div>
   );
 }

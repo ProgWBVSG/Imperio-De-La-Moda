@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { SUPABASE_URL, getSupabaseHeaders } from "@/lib/supabase";
+import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { randomUUID } from "crypto";
 
@@ -10,31 +10,46 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("q") || "";
   const estado = searchParams.get("estado") || "";
+  
   try {
-    let fetchUrl = `${SUPABASE_URL}/rest/v1/Producto?select=*&order=creado_en.desc`;
-    if (search) fetchUrl += `&nombre=ilike.*${encodeURIComponent(search)}*`;
-    if (estado === "activos") fetchUrl += `&oculto=eq.false`;
-    else if (estado === "ocultos") fetchUrl += `&oculto=eq.true`;
-    else if (estado === "sin-stock") fetchUrl += `&stock=eq.0`;
+    const whereClause: any = {};
+    if (search) {
+      whereClause.nombre = { contains: search, mode: "insensitive" };
+    }
+    if (estado === "activos") whereClause.oculto = false;
+    else if (estado === "ocultos") whereClause.oculto = true;
+    else if (estado === "sin-stock") whereClause.stock = 0;
 
-    const res = await fetch(fetchUrl, { headers: getSupabaseHeaders() });
-    if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-    const data = await res.json();
-    return NextResponse.json(data.map((p: any) => ({...p, talles: JSON.parse(p.talles||"[]"), colores: JSON.parse(p.colores||"[]"), fotos: JSON.parse(p.fotos||"[]"), stock_por_talle: JSON.parse(p.stock_por_talle||"{}")})));
+    const productos = await prisma.producto.findMany({
+      where: whereClause,
+      orderBy: { creado_en: 'desc' }
+    });
+
+    return NextResponse.json(productos.map((p) => ({
+        ...p, 
+        talles: JSON.parse(p.talles||"[]"), 
+        colores: JSON.parse(p.colores||"[]"), 
+        fotos: JSON.parse(p.fotos||"[]"), 
+        stock_por_talle: JSON.parse(p.stock_por_talle||"{}"),
+        productos_relacionados: JSON.parse(p.productos_relacionados||"[]")
+    })));
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Error al listar productos" }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
+  const authError = await requireAdmin();
+  if (authError) return authError;
+
   try {
     const body = await request.json();
     let slug = body.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     
-    // ver unique
-    const uRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto?slug=eq.${slug}`, { headers: getSupabaseHeaders() });
-    const uData = await uRes.json();
-    if (uData.length > 0) slug = `${slug}-${Date.now()}`;
+    // check unique
+    const existing = await prisma.producto.findUnique({ where: { slug } });
+    if (existing) slug = `${slug}-${Date.now()}`;
 
     const stockPorTalle = body.stock_por_talle || {};
     const stockTotal = Object.values(stockPorTalle).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0);
@@ -52,19 +67,25 @@ export async function POST(request: Request) {
         colores: JSON.stringify(body.colores || []),
         stock_por_talle: JSON.stringify(stockPorTalle),
         fotos: JSON.stringify(body.fotos || []),
+        productos_relacionados: JSON.stringify(body.productos_relacionados || []),
         stock: stockTotal,
         oculto: body.oculto ?? false,
         destacado: body.destacado ?? false,
         novedad: body.novedad ?? true,
-        actualizado_en: new Date().toISOString()
     };
 
-    const iRes = await fetch(`${SUPABASE_URL}/rest/v1/Producto`, { method: "POST", headers: getSupabaseHeaders(), body: JSON.stringify(payload) });
-    if (!iRes.ok) throw new Error("Insert failed");
-    const [inserted] = await iRes.json();
+    const inserted = await prisma.producto.create({ data: payload });
 
-    return NextResponse.json({ ...inserted, talles: JSON.parse(inserted.talles||"[]"), colores: JSON.parse(inserted.colores||"[]"), fotos: JSON.parse(inserted.fotos||"[]"), stock_por_talle: JSON.parse(inserted.stock_por_talle||"{}") }, { status: 201 });
+    return NextResponse.json({ 
+        ...inserted, 
+        talles: JSON.parse(inserted.talles||"[]"), 
+        colores: JSON.parse(inserted.colores||"[]"), 
+        fotos: JSON.parse(inserted.fotos||"[]"), 
+        stock_por_talle: JSON.parse(inserted.stock_por_talle||"{}"),
+        productos_relacionados: JSON.parse(inserted.productos_relacionados||"[]")
+    }, { status: 201 });
   } catch (error) {
+    console.error(error);
     return NextResponse.json({ error: "Error al crear producto" }, { status: 500 });
   }
 }

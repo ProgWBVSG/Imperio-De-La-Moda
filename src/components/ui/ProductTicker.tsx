@@ -30,13 +30,24 @@ function ProductCard({ producto }: { producto: Producto }) {
         {/* Imagen */}
         <div className="relative h-48 w-full overflow-hidden bg-gray-50">
           {foto ? (
-            <Image
-              src={foto}
-              alt={producto.nombre}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
-              sizes="200px"
-            />
+            <>
+              <Image
+                src={foto}
+                alt={producto.nombre}
+                fill
+                className={`object-cover transition-all duration-500 group-hover:scale-105 ${producto.fotos && producto.fotos.length > 1 ? 'group-hover:opacity-0' : ''}`}
+                sizes="200px"
+              />
+              {producto.fotos && producto.fotos.length > 1 && (
+                <Image 
+                  src={producto.fotos[1]} 
+                  alt={`${producto.nombre} - detalle`} 
+                  fill 
+                  className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                  sizes="200px"
+                />
+              )}
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-gray-300">
               <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -3,7 +3,7 @@
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function CartPage() {
   const { items, quitarItem, actualizarCantidad, subtotal, cantidadTotal, vaciarCarrito, generarMensajeWhatsApp } = useCart();
@@ -11,8 +11,47 @@ export default function CartPage() {
   const [esMayorista, setEsMayorista] = useState(false);
   const [nombre, setNombre] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [recomendados, setRecomendados] = useState<any[]>([]);
 
   const MIN_MAYORISTA = 6; // Confirmar esto con el cliente
+
+  useEffect(() => {
+    if (items.length > 0) {
+      fetch('/api/productos')
+        .then(res => res.json())
+        .then(data => {
+          if (!Array.isArray(data)) return;
+          const inCartIds = items.map(i => i.productoId);
+          const cartProductsData = data.filter(p => inCartIds.includes(p.id));
+          
+          let recIds: string[] = [];
+          cartProductsData.forEach(p => {
+            if (Array.isArray(p.productos_relacionados)) {
+              recIds.push(...p.productos_relacionados);
+            }
+          });
+          
+          let recommendations = data.filter(p => recIds.includes(p.id) && !inCartIds.includes(p.id) && p.stock > 0);
+          
+          if (recommendations.length < 4) {
+            const categories = cartProductsData.map(p => p.categoria);
+            const extras = data.filter(p => 
+              categories.includes(p.categoria) && 
+              !inCartIds.includes(p.id) && 
+              !recIds.includes(p.id) &&
+              p.stock > 0
+            ).sort((a,b) => (b.vistas || 0) - (a.vistas || 0));
+            
+            recommendations = [...recommendations, ...extras];
+          }
+          
+          setRecomendados(recommendations.slice(0, 4));
+        })
+        .catch(() => {});
+    } else {
+      setRecomendados([]);
+    }
+  }, [items]);
 
   // Validación automática: Si lleva la cantidad mínima, sugerir o forzar a mayorista
   const handleEsMayoristaToggle = (val: boolean) => {
@@ -214,6 +253,50 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+
+        {/* RECOMENDACIONES DEL CARRITO */}
+        {recomendados.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-border">
+            <h2 className="font-display text-3xl font-bold text-primary mb-8">Antes de irte, te sugerimos...</h2>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+              {recomendados.map(rec => (
+                <Link href={`/producto/${rec.slug}`} key={rec.id} className="group bg-white rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all flex flex-col h-full">
+                  <div className="relative aspect-[3/4] w-full bg-gray-100 overflow-hidden">
+                    {rec.fotos && rec.fotos[0] ? (
+                      <Image 
+                        src={rec.fotos[0]} 
+                        alt={rec.nombre} 
+                        fill 
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 768px) 50vw, 25vw"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center text-gray-300">
+                        <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <span className="text-xs text-gray-400 capitalize mb-1">{rec.categoria}</span>
+                    <h3 className="font-bold text-primary text-sm line-clamp-2 leading-tight mb-3 group-hover:text-accent transition-colors">{rec.nombre}</h3>
+                    
+                    <div className="mt-auto space-y-1">
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] font-bold text-whatsapp bg-whatsapp/10 px-1.5 py-0.5 rounded">Mayorista</span>
+                        <span className="font-bold text-whatsapp text-sm">${rec.precio_mayorista.toLocaleString('es-AR')}</span>
+                      </div>
+                      <div className="flex justify-between items-end">
+                        <span className="text-[10px] text-gray-500">Minorista</span>
+                        <span className="font-bold text-gray-900 text-sm">${rec.precio_minorista.toLocaleString('es-AR')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

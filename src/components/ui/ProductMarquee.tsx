@@ -25,14 +25,26 @@ function ProductCard({ product }: { product: Product }) {
       {/* Imagen */}
       <div className="relative aspect-[3/4] w-full bg-black/30 overflow-hidden">
         {foto ? (
-          <Image
-            src={foto}
-            alt={product.nombre}
-            fill
-            className="object-cover group-hover:scale-110 transition-transform duration-700"
-            sizes="260px"
-            loading="lazy"
-          />
+          <>
+            <Image
+              src={foto}
+              alt={product.nombre}
+              fill
+              className={`object-cover transition-all duration-700 group-hover:scale-110 ${product.fotos && product.fotos.length > 1 ? 'group-hover:opacity-0' : ''}`}
+              sizes="260px"
+              loading="lazy"
+            />
+            {product.fotos && product.fotos.length > 1 && (
+              <Image 
+                src={product.fotos[1]} 
+                alt={`${product.nombre} - detalle`} 
+                fill 
+                className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110"
+                sizes="260px"
+                loading="lazy"
+              />
+            )}
+          </>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-white/20">
             <svg className="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">

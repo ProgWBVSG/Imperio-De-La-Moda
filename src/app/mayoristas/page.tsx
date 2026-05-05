@@ -142,8 +142,8 @@ export default function Mayoristas() {
           
           <div>
             <label className="block text-sm font-medium text-primary mb-1">¿Tenés local propio o vendés por redes?</label>
-            <select className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition bg-white" required>
-              <option value="" disabled selected>Elegí una opción</option>
+            <select defaultValue="" className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent outline-none transition bg-white" required>
+              <option value="" disabled>Elegí una opción</option>
               <option value="local">Tengo local a la calle</option>
               <option value="redes">Vendo online (Instagram/Facebook)</option>
               <option value="arranco">Apenas estoy arrancando</option>

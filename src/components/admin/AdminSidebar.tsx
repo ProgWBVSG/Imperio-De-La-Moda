@@ -3,15 +3,31 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAdminTheme } from "./AdminThemeProvider";
+import { 
+  LayoutDashboard, 
+  Package, 
+  ClipboardList, 
+  MessageCircle, 
+  Star, 
+  Tag, 
+  Settings,
+  Sun,
+  Moon,
+  Globe,
+  Users,
+  CheckSquare
+} from "lucide-react";
 
 const navItems = [
-  { icon: "📊", label: "Dashboard", href: "/admin" },
-  { icon: "📦", label: "Productos", href: "/admin/productos" },
-  { icon: "📋", label: "Stock", href: "/admin/stock" },
-  { icon: "💬", label: "Pedidos WA", href: "/admin/pedidos" },
-  { icon: "⭐", label: "Testimonios", href: "/admin/testimonios" },
-  { icon: "🏷️", label: "Promos", href: "/admin/promos" },
-  { icon: "⚙️", label: "Config", href: "/admin/configuracion" },
+  { icon: <LayoutDashboard size={20} />, label: "Dashboard", href: "/admin" },
+  { icon: <CheckSquare size={20} />, label: "Tareas", href: "/admin/tareas" },
+  { icon: <Package size={20} />, label: "Productos", href: "/admin/productos" },
+  { icon: <ClipboardList size={20} />, label: "Stock", href: "/admin/stock" },
+  { icon: <MessageCircle size={20} />, label: "Pedidos WA", href: "/admin/pedidos" },
+  { icon: <Users size={20} />, label: "CRM Clientes", href: "/admin/clientes" },
+  { icon: <Star size={20} />, label: "Testimonios", href: "/admin/testimonios" },
+  { icon: <Tag size={20} />, label: "Promos", href: "/admin/promos" },
+  { icon: <Settings size={20} />, label: "Config", href: "/admin/configuracion" },
 ];
 
 export default function AdminSidebar() {
@@ -58,7 +74,7 @@ export default function AdminSidebar() {
             className="admin-sidebar-link w-full justify-between"
           >
             <span className="flex items-center gap-3">
-              <span className="text-lg">{theme === "dark" ? "☀️" : "🌙"}</span>
+              <span className="flex items-center justify-center w-5">{theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}</span>
               <span>{theme === "dark" ? "Modo claro" : "Modo oscuro"}</span>
             </span>
             <div className="relative">
@@ -77,7 +93,7 @@ export default function AdminSidebar() {
             target="_blank"
             className="admin-sidebar-link text-xs"
           >
-            <span>🌐</span>
+            <Globe size={16} />
             <span>Ver sitio web</span>
           </Link>
         </div>
@@ -97,7 +113,7 @@ export default function AdminSidebar() {
         ))}
         {/* Theme toggle en mobile */}
         <button onClick={toggle} className={`admin-tab-item`}>
-          <span className="text-lg">{theme === "dark" ? "☀️" : "🌙"}</span>
+          <span className="flex justify-center items-center h-6">{theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}</span>
           <span>{theme === "dark" ? "Claro" : "Oscuro"}</span>
         </button>
       </nav>

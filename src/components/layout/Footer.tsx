@@ -69,7 +69,7 @@ export default function Footer() {
         {/* BOTTOM */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
           <p>&copy; {new Date().getFullYear()} Imperio de la Moda. Todos los derechos reservados.</p>
-          <p>Hecho con ❤️ en Córdoba, Argentina</p>
+          <p>Página creada por <a href="https://instagram.com/mybdigitals.ai" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline font-medium">MYB Digitals</a></p>
         </div>
       </div>
     </footer>

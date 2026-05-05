@@ -61,64 +61,65 @@ export default function TestimoniosAdmin() {
   };
 
   return (
-    <div>
+    <div className="p-4 md:p-8 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Testimonios y Reseñas</h1>
-        <Link href="/admin/testimonios/nuevo" className="bg-black text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition">
+        <h1 className="text-2xl font-bold">Testimonios y Reseñas</h1>
+        <Link href="/admin/testimonios/nuevo" className="admin-btn admin-btn-primary admin-btn-lg">
           + Agregar Nuevo
         </Link>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">Cargando testimonios...</div>
-        ) : testimonios.length === 0 ? (
-          <div className="p-8 text-center">
-            <h3 className="text-gray-500 mb-2">Aún no hay testimonios registrados</h3>
-            <p className="text-sm text-gray-400">Agregá tu primera reseña para que aparezca en la página principal.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-sm font-medium text-gray-500">
-                  <th className="p-4">Autor</th>
-                  <th className="p-4">Reseña</th>
-                  <th className="p-4">Origen</th>
-                  <th className="p-4">Visible Pág. Principal</th>
-                  <th className="p-4 text-right">Acciones</th>
+      {loading ? (
+        <div className="text-center py-12" style={{ color: "var(--admin-text-muted)" }}>
+          Cargando testimonios...
+        </div>
+      ) : testimonios.length === 0 ? (
+        <div className="admin-card text-center py-12">
+          <p className="text-4xl mb-3">💬</p>
+          <p className="font-bold text-lg mb-1">Aún no hay testimonios registrados</p>
+          <p className="text-sm mb-4" style={{ color: "var(--admin-text-muted)" }}>Agregá tu primera reseña para que aparezca en la página principal.</p>
+        </div>
+      ) : (
+        <div className="admin-card overflow-x-auto">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Autor</th>
+                <th>Reseña</th>
+                <th>Origen</th>
+                <th>Visibilidad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {testimonios.map((t) => (
+                <tr key={t.id}>
+                  <td className="font-bold">{t.autor}</td>
+                  <td className="text-sm max-w-xs truncate" title={t.texto} style={{ color: "var(--admin-text-muted)" }}>{t.texto}</td>
+                  <td>
+                    <span className="admin-badge admin-badge-secondary">
+                      {t.origen}
+                    </span>
+                  </td>
+                  <td>
+                    <button 
+                      onClick={() => toggleVisibility(t.id, t.visible)}
+                      className={`admin-badge cursor-pointer ${!t.visible ? 'admin-badge-muted' : 'admin-badge-success'}`}
+                    >
+                      {t.visible ? "VISIBLE" : "OCULTO"}
+                    </button>
+                  </td>
+                  <td>
+                    <button onClick={() => deleteTestimonio(t.id)} className="admin-btn admin-btn-danger text-xs">
+                      Eliminar
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {testimonios.map((t) => (
-                  <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="p-4 font-medium text-gray-900 whitespace-nowrap">{t.autor}</td>
-                    <td className="p-4 text-gray-600 text-sm max-w-xs truncate" title={t.texto}>{t.texto}</td>
-                    <td className="p-4">
-                      <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium">
-                        {t.origen}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <button 
-                        onClick={() => toggleVisibility(t.id, t.visible)}
-                        className={`w-12 h-6 rounded-full relative transition-colors ${t.visible ? 'bg-green-500' : 'bg-gray-300'}`}
-                      >
-                        <div className={`w-4 h-4 rounded-full bg-white absolute top-1 transition-transform ${t.visible ? 'left-7' : 'left-1'}`} />
-                      </button>
-                    </td>
-                    <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                      <button onClick={() => deleteTestimonio(t.id)} className="text-red-500 hover:text-red-700 font-medium text-sm">
-                        Eliminar
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

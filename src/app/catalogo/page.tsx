@@ -4,6 +4,8 @@ import { useState, useEffect, useMemo, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
+import { useFavorites } from '@/context/FavoritesContext';
 
 // Definimos la interfaz base
 export interface Product {
@@ -196,6 +198,43 @@ function CatalogContent() {
   }, [products, search, categoria, precioMax, order]);
 
   const promoCount = products.filter(p => p.en_promo).length;
+  const { agregarItem } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
+
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault(); // Evitar navegación al producto
+    const talle = product.talles?.[0] || "Único";
+    const color = product.colores?.[0] || "Único";
+    const uniqueId = `${product.id}-${talle}-${color}`;
+    
+    agregarItem({
+      id: uniqueId,
+      productoId: product.id,
+      nombre: product.nombre,
+      precio_mayorista: product.precio_mayorista_promo || product.precio_mayorista,
+      precio_minorista: product.precio_minorista_promo || product.precio_minorista,
+      cantidad: 1,
+      talle: talle,
+      color: color,
+      imagen: product.fotos?.[0] || ""
+    });
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    toggleFavorite({
+      id: product.id,
+      slug: product.slug,
+      nombre: product.nombre,
+      categoria: product.categoria,
+      precio_mayorista: product.precio_mayorista,
+      precio_minorista: product.precio_minorista,
+      imagen: product.fotos?.[0] || "",
+      en_promo: product.en_promo,
+      precio_minorista_promo: product.precio_minorista_promo,
+      precio_mayorista_promo: product.precio_mayorista_promo
+    });
+  };
 
   return (
     <div className="bg-bg min-h-screen pb-20">
@@ -353,18 +392,30 @@ function CatalogContent() {
                 <Link href={`/producto/${product.slug}`} key={product.id} className="group bg-white rounded-xl overflow-hidden border border-border hover:shadow-lg transition-all flex flex-col h-full">
                   <div className="relative aspect-[3/4] w-full bg-gray-100 overflow-hidden">
                     {product.fotos && product.fotos[0] && (
-                      <Image 
-                        src={product.fotos[0]} 
-                        alt={product.nombre} 
-                        fill 
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        sizes="(max-width: 768px) 50vw, 33vw"
-                        loading="lazy"
-                      />
+                      <>
+                        <Image 
+                          src={product.fotos[0]} 
+                          alt={product.nombre} 
+                          fill 
+                          className={`object-cover transition-all duration-500 group-hover:scale-105 ${product.fotos.length > 1 ? 'group-hover:opacity-0' : ''}`}
+                          sizes="(max-width: 768px) 50vw, 33vw"
+                          loading="lazy"
+                        />
+                        {product.fotos.length > 1 && (
+                          <Image 
+                            src={product.fotos[1]} 
+                            alt={`${product.nombre} - detalle`} 
+                            fill 
+                            className="object-cover opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:scale-105"
+                            sizes="(max-width: 768px) 50vw, 33vw"
+                            loading="lazy"
+                          />
+                        )}
+                      </>
                     )}
                     {/* Badge de promo */}
                     {product.en_promo && product.promo_porcentaje && (
-                      <span className="absolute top-2 right-2 bg-red-500 text-white text-xs font-black px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1 z-10">
+                      <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-black px-2.5 py-1.5 rounded-lg shadow-lg flex items-center gap-1 z-10">
                         <span className="text-base">🔥</span>
                         <span>-{product.promo_porcentaje}%</span>
                       </span>
@@ -377,6 +428,21 @@ function CatalogContent() {
                         <span className="bg-primary text-white text-sm font-bold px-4 py-2 rounded-full uppercase">Agotado</span>
                       </div>
                     )}
+                    
+                    {/* Botón de Favorito Flotante */}
+                    <button
+                      onClick={(e) => handleFavoriteClick(e, product)}
+                      className="absolute top-2 right-2 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-400 hover:text-red-500 hover:scale-110 transition-all z-20 group/fav"
+                      aria-label="Toggle favorito"
+                    >
+                      <svg 
+                        className={`w-5 h-5 transition-colors ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'fill-none'}`} 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isFavorite(product.id) ? 0 : 2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                    </button>
                   </div>
                   <div className="p-4 flex flex-col flex-1">
                     <span className="text-xs text-gray-400 capitalize mb-1">{product.categoria}</span>
@@ -396,7 +462,7 @@ function CatalogContent() {
                         )}
                       </div>
                       {/* Precios minorista */}
-                      <div className="flex justify-between items-end">
+                      <div className="flex justify-between items-end mb-3">
                         <span className="text-xs text-gray-500">Minorista</span>
                         {product.en_promo && product.precio_minorista_promo ? (
                           <div className="flex items-center gap-2">
@@ -406,6 +472,27 @@ function CatalogContent() {
                         ) : (
                           <span className="font-bold text-gray-900">${product.precio_minorista.toLocaleString('es-AR')}</span>
                         )}
+                      </div>
+                      
+                      {/* Botones */}
+                      <div className="grid grid-cols-2 gap-2 mt-2">
+                        <button 
+                          onClick={(e) => handleAddToCart(e, product)}
+                          className="w-full bg-primary text-white py-2 rounded-lg font-bold text-xs hover:bg-accent hover:text-primary transition-colors flex items-center justify-center gap-1.5"
+                          disabled={product.stock === 0}
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                          </svg>
+                          Agregar
+                        </button>
+                        <div className="w-full bg-white text-primary border border-primary py-2 rounded-lg font-bold text-xs hover:bg-primary hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Ver
+                        </div>
                       </div>
                     </div>
                   </div>
