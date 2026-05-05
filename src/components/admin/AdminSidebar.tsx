@@ -84,7 +84,7 @@ export default function AdminSidebar() {
       </aside>
 
       {/* BOTTOM TAB BAR MOBILE */}
-      <nav className="admin-tab-bar md:hidden">
+      <nav className="admin-tab-bar flex justify-around md:hidden">
         {navItems.slice(0, 5).map((item) => (
           <Link
             key={item.href}

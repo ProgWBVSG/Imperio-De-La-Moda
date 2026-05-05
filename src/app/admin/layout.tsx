@@ -19,7 +19,7 @@ export default function AdminLayout({
   return (
     <AdminThemeProvider>
       <AdminSidebar />
-      <main className="min-h-screen md:ml-[240px] pb-20 md:pb-0">
+      <main className="min-h-screen md:ml-[240px] pb-24 md:pb-12">
         {children}
       </main>
     </AdminThemeProvider>
