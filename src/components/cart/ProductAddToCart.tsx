@@ -28,8 +28,8 @@ interface ProductProps {
 export function ProductAddToCart({ product }: ProductProps) {
   const { agregarItem, generarMensajeProducto } = useCart();
 
-  const [selectedTalle, setSelectedTalle] = useState(product.talles[0] || "");
-  const [selectedColor, setSelectedColor] = useState(product.colores[0] || "");
+  const [selectedTalle, setSelectedTalle] = useState(product.talles?.[0] || "");
+  const [selectedColor, setSelectedColor] = useState(product.colores?.[0] || "");
   const [cantidad, setCantidad] = useState(1);
   const [agregado, setAgregado] = useState(false);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
@@ -48,7 +48,7 @@ export function ProductAddToCart({ product }: ProductProps) {
       cantidad,
       talle: selectedTalle,
       color: selectedColor,
-      imagen: product.fotos[0] || "",
+      imagen: product.fotos?.[0] || "",
     };
 
     agregarItem(item);
@@ -188,7 +188,7 @@ export function ProductAddToCart({ product }: ProductProps) {
                 categoria: product.categoria || "",
                 precio_mayorista: product.precio_mayorista,
                 precio_minorista: product.precio_minorista,
-                imagen: product.fotos[0] || "",
+                imagen: product.fotos?.[0] || "",
                 en_promo: product.en_promo,
                 precio_minorista_promo: product.precio_minorista_promo,
                 precio_mayorista_promo: product.precio_mayorista_promo

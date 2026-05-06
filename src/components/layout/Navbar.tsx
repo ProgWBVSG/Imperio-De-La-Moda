@@ -88,10 +88,11 @@ export default function Navbar() {
               </Link>
               
               <div className="absolute top-full left-0 bg-white shadow-xl rounded-xl border border-gray-100 py-3 min-w-[200px] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all translate-y-2 group-hover:translate-y-0">
-                <Link href="/catalogo/remeras" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Remeras y Musculosas</Link>
-                <Link href="/catalogo/pantalones" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Pantalones y Jeans</Link>
-                <Link href="/catalogo/abrigos" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Buzos y Camperas</Link>
-                <Link href="/catalogo/promos" className="block px-5 py-2.5 text-red-600 font-bold hover:bg-red-50 transition-colors">🔥 Promociones</Link>
+                <Link href="/catalogo?categoria=mujer" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Colección Mujer</Link>
+                <Link href="/catalogo?categoria=hombre" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Colección Hombre</Link>
+                <Link href="/catalogo?categoria=ninos" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Moda Niños</Link>
+                <Link href="/catalogo?categoria=accesorios" className="block px-5 py-2.5 text-gray-700 hover:bg-gray-50 hover:text-primary transition-colors">Accesorios</Link>
+                <Link href="/catalogo?categoria=promos" className="block px-5 py-2.5 text-red-600 font-bold hover:bg-red-50 transition-colors">🔥 Promociones</Link>
               </div>
             </div>
             
