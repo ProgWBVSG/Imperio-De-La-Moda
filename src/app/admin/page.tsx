@@ -51,11 +51,17 @@ export default function DashboardAdmin() {
   const [graficoVentas, setGraficoVentas] = useState<any[]>([]);
   const [rendimientoProductos, setRendimientoProductos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/stats")
       .then(res => res.json())
       .then(data => {
+        if (data.error) {
+          setError(data.error);
+          setLoading(false);
+          return;
+        }
         if (data.stats) setStats(data.stats);
         if (data.stockBajo) setStockBajo(data.stockBajo);
         if (data.topVistos) setTopVistos(data.topVistos);
@@ -65,13 +71,29 @@ export default function DashboardAdmin() {
         if (data.rendimientoProductos) setRendimientoProductos(data.rendimientoProductos);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch((e) => {
+        setError(e.message || "Error de red");
+        setLoading(false);
+      });
   }, []);
 
   const formatPrecio = (n: number) => `$${n.toLocaleString("es-AR")}`;
 
-  if (loading || !stats) {
+  if (loading) {
     return <div className="p-8 text-center" style={{ color: "var(--admin-text-muted)" }}>Cargando inteligencia analítica...</div>;
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="p-8 text-center text-red-500">
+        <AlertTriangle className="mx-auto h-12 w-12 mb-4" />
+        <h2 className="text-xl font-bold mb-2">Error al cargar estadísticas</h2>
+        <p>{error || "No se pudo conectar con la base de datos."}</p>
+        <button onClick={() => window.location.reload()} className="mt-4 px-4 py-2 bg-accent text-primary rounded-md font-bold">
+          Reintentar
+        </button>
+      </div>
+    );
   }
 
   return (
