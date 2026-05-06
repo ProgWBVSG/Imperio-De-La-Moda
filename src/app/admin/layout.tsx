@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import AdminSidebar from "@/components/admin/AdminSidebar";
+import AdminLayoutWrapper from "@/components/admin/AdminLayoutWrapper";
 import { AdminThemeProvider } from "@/components/admin/AdminThemeProvider";
 import "./admin.css";
 
@@ -18,10 +18,9 @@ export default function AdminLayout({
 }) {
   return (
     <AdminThemeProvider>
-      <AdminSidebar />
-      <main className="min-h-screen md:ml-[240px] pb-24 md:pb-12">
+      <AdminLayoutWrapper>
         {children}
-      </main>
+      </AdminLayoutWrapper>
     </AdminThemeProvider>
   );
 }
