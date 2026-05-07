@@ -27,6 +27,7 @@ interface ProductProps {
 
 export function ProductAddToCart({ product }: ProductProps) {
   const { agregarItem, generarMensajeProducto } = useCart();
+  const { toggleFavorite, isFavorite } = useFavorites();
 
   const [selectedTalle, setSelectedTalle] = useState(product.talles?.[0] || "");
   const [selectedColor, setSelectedColor] = useState(product.colores?.[0] || "");
