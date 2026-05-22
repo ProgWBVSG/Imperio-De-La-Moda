@@ -22,7 +22,7 @@ export default function AdminLayoutWrapper({
   return (
     <>
       <AdminSidebar />
-      <main className="min-h-screen md:ml-[240px] pb-24 md:pb-12">
+      <main className="min-h-screen md:ml-[240px] pt-16 md:pt-0 pb-12">
         {children}
       </main>
     </>
